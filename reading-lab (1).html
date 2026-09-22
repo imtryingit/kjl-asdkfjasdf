@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reading Lab — Práctica de Lectura en Inglés</title>
+<style>
+  /* =========================================================
+     TOKENS
+  ========================================================= */
+  :root{
+    --bg:#F5F6F8;
+    --surface:#FFFFFF;
+    --ink:#1B2430;
+    --ink-soft:#5B6472;
+    --ink-faint:#8A93A2;
+    --border:#E1E4EA;
+    --border-strong:#CCD1D9;
+
+    --accent:#245C52;
+    --accent-dark:#173F38;
+    --accent-soft:#E4EFEC;
+
+    --level-a:#3E7D4C;
+    --level-a-bg:#E8F3EA;
+    --level-b:#96630F;
+    --level-b-bg:#FBF1DE;
+    --level-c:#6A3E8C;
+    --level-c-bg:#F1E7F7;
+
+    --success:#2E7D4F;
+    --success-bg:#E5F5EA;
+    --danger:#B3403A;
+    --danger-bg:#FBEAE9;
+
+    --radius-s:6px;
+    --radius-m:10px;
+    --radius-l:14px;
+
+    --shadow-rest:0 1px 2px rgba(20,26,36,0.06);
+    --shadow-hover:0 10px 28px rgba(20,26,36,0.12);
+
+    --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-serif: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", "Times New Roman", serif;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-ui);
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:60px;
+  }
+  ::selection{ background:#CFE3DE; }
+  :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  h1,h2,h3{ margin:0; font-family:var(--font-serif); }
+  p{ margin:0; }
+  button{ font-family:inherit; cursor:pointer; }
+
+  /* =========================================================
+     TOP BAR
+  ========================================================= */
+  .topbar{
+    position:sticky; top:0; z-index:40;
+    background:var(--accent-dark);
+    color:#F2F5F4;
+    padding:14px 24px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    flex-wrap:wrap;
+  }
+  .brand{
+    display:flex; align-items:baseline; gap:10px;
+  }
+  .brand .mark{
+    width:30px; height:30px; border-radius:50%;
+    background:#F2F5F4; color:var(--accent-dark);
+    display:inline-flex; align-items:center; justify-content:center;
+    font-family:var(--font-serif); font-weight:700; font-size:15px;
+    flex:none;
+  }
+  .brand h1{ font-size:1.28rem; font-weight:600; letter-spacing:0.2px; color:#fff; }
+  .brand span.tagline{ font-size:0.78rem; color:#C8D6D2; font-family:var(--font-ui); }
+
+  .status-cluster{ display:flex; align-items:center; gap:22px; }
+  .status-item{ display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#DCE6E3; }
+  .status-item .label{ color:#AFC0BB; }
+  .dot{
+    width:8px; height:8px; border-radius:50%;
+    background:#6FBF8B; flex:none;
+    transition:background .3s ease;
+  }
+  .dot.saving{ background:#E3B341; animation:pulse 0.9s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{ opacity:1;} 50%{ opacity:0.35;} }
+  .timer{ font-variant-numeric:tabular-nums; font-weight:600; color:#fff; }
+
+  /* =========================================================
+     CONTROL BAR (filters + search)
+  ========================================================= */
+  .controlbar{
+    position:sticky; top:60px; z-index:30;
+    background:var(--surface);
+    border-bottom:1px solid var(--border);
+    padding:14px 24px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    flex-wrap:wrap;
+  }
+  .level-filters{ display:flex; gap:8px; flex-wrap:wrap; }
+  .filter-btn{
+    border:1px solid var(--border-strong);
+    background:#fff;
+    color:var(--ink-soft);
+    padding:8px 15px;
+    border-radius:999px;
+    font-size:0.85rem;
+    font-weight:600;
+    transition:all .15s ease;
+  }
+  .filter-btn:hover{ border-color:var(--accent); color:var(--accent-dark); }
+  .filter-btn.active{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#fff;
+  }
+
+  .search-wrap{
+    position:relative;
+    min-width:220px;
+    flex:1 1 260px;
+    max-width:340px;
+  }
+  .search-wrap input{
+    width:100%;
+    padding:9px 14px 9px 34px;
+    border-radius:999px;
+    border:1px solid var(--border-strong);
+    font-size:0.9rem;
+    color:var(--ink);
+    background:#fff;
+  }
+  .search-wrap input:focus{ border-color:var(--accent); }
+  .search-wrap svg{
+    position:absolute; left:11px; top:50%; transform:translateY(-50%);
+    width:15px; height:15px; color:var(--ink-faint);
+  }
+
+  /* =========================================================
+     MAIN LAYOUT
+  ========================================================= */
+  main{
+    max-width:1180px;
+    margin:0 auto;
+    padding:28px 24px 10px;
+  }
+  .intro-row{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    gap:12px; margin-bottom:20px; flex-wrap:wrap;
+  }
+  .intro-row h2{ font-size:1.15rem; color:var(--ink); font-weight:600; }
+  .intro-row .count{ font-size:0.85rem; color:var(--ink-faint); }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(360px, 1fr));
+    gap:22px;
+  }
+
+  .empty-state{
+    display:none;
+    text-align:center;
+    padding:60px 20px;
+    color:var(--ink-faint);
+    font-size:0.95rem;
+  }
+  .empty-state.show{ display:block; }
+
+  /* =========================================================
+     READING CARD
+  ========================================================= */
+  .reading-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-left:4px solid var(--level-a);
+    border-radius:var(--radius-l);
+    box-shadow:var(--shadow-rest);
+    padding:22px 24px 24px;
+    display:flex; flex-direction:column; gap:16px;
+    transition:box-shadow .18s ease, transform .18s ease;
+  }
+  .reading-card:hover{ box-shadow:var(--shadow-hover); transform:translateY(-2px); }
+  .reading-card[data-level="B"]{ border-left-color:var(--level-b); }
+  .reading-card[data-level="C"]{ border-left-color:var(--level-c); }
+
+  .card-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .level-badge{
+    display:inline-block;
+    font-size:0.72rem;
+    font-weight:700;
+    padding:4px 10px;
+    border-radius:999px;
+    background:var(--level-a-bg); color:var(--level-a);
+    white-space:nowrap;
+  }
+  .reading-card[data-level="B"] .level-badge{ background:var(--level-b-bg); color:var(--level-b); }
+  .reading-card[data-level="C"] .level-badge{ background:var(--level-c-bg); color:var(--level-c); }
+
+  .meta-info{ font-size:0.75rem; color:var(--ink-faint); text-align:right; line-height:1.4; }
+
+  .card-title{ font-size:1.28rem; font-weight:600; color:var(--ink); line-height:1.3; }
+  .card-subtitle{ font-size:0.83rem; color:var(--ink-soft); font-style:italic; font-family:var(--font-serif); }
+
+  .reading-text{
+    font-family:var(--font-serif);
+    font-size:1.03rem;
+    line-height:1.85;
+    color:#25303E;
+    text-align:justify;
+    hyphens:auto;
+  }
+  .word{
+    cursor:pointer;
+    border-radius:3px;
+    padding:0 1px;
+    transition:background .12s ease;
+  }
+  .word:hover{ background:var(--accent-soft); }
+  .word.active{ background:var(--accent); color:#fff; }
+
+  .translation-toggle{
+    align-self:flex-start;
+    display:inline-flex; align-items:center; gap:6px;
+    background:transparent;
+    border:1px solid var(--accent);
+    color:var(--accent-dark);
+    font-size:0.82rem;
+    font-weight:600;
+    padding:7px 14px;
+    border-radius:999px;
+    transition:background .15s ease, color .15s ease;
+  }
+  .translation-toggle:hover{ background:var(--accent); color:#fff; }
+  .translation-toggle svg{ width:13px; height:13px; transition:transform .2s ease; }
+  .translation-toggle.open svg{ transform:rotate(180deg); }
+
+  .translation-box{
+    font-family:var(--font-serif);
+    font-style:italic;
+    font-size:0.98rem;
+    line-height:1.75;
+    color:var(--ink-soft);
+    background:#FAFAF8;
+    border:1px dashed var(--border-strong);
+    border-radius:var(--radius-m);
+    padding:14px 16px;
+    text-align:justify;
+    max-height:0;
+    opacity:0;
+    overflow:hidden;
+    padding-top:0; padding-bottom:0;
+    border-width:0;
+    transition:max-height .3s ease, opacity .25s ease, padding .3s ease;
+  }
+  .translation-box.open{
+    max-height:600px;
+    opacity:1;
+    padding:14px 16px;
+    border-width:1px;
+  }
+
+  /* =========================================================
+     QUESTIONS
+  ========================================================= */
+  .questions{ display:flex; flex-direction:column; gap:14px; border-top:1px solid var(--border); padding-top:16px; }
+  .questions-title{ font-size:0.8rem; font-weight:700; color:var(--ink-soft); }
+  .question{ display:flex; flex-direction:column; gap:9px; }
+  .question .q-text{ font-size:0.94rem; font-weight:600; color:var(--ink); }
+  .options{ display:flex; flex-direction:column; gap:7px; }
+  .option-btn{
+    text-align:left;
+    background:#fff;
+    border:1px solid var(--border-strong);
+    border-radius:var(--radius-s);
+    padding:9px 12px;
+    font-size:0.87rem;
+    color:var(--ink);
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .option-btn:not(:disabled):hover{ border-color:var(--accent); background:var(--accent-soft); }
+  .option-btn:disabled{ cursor:default; }
+  .option-btn.correct{ border-color:var(--success); background:var(--success-bg); color:var(--success); font-weight:600; }
+  .option-btn.incorrect{ border-color:var(--danger); background:var(--danger-bg); color:var(--danger); font-weight:600; }
+
+  .feedback{ font-size:0.85rem; line-height:1.5; padding:2px 2px 0; }
+  .feedback.correct-text{ color:var(--success); }
+  .feedback.incorrect-text{ color:var(--danger); }
+
+  /* =========================================================
+     VOCAB POPUP
+  ========================================================= */
+  #vocab-popup{
+    display:none;
+    position:absolute;
+    z-index:100;
+    max-width:260px;
+    background:var(--ink);
+    color:#F4F6F5;
+    border-radius:var(--radius-m);
+    padding:12px 14px;
+    box-shadow:0 14px 30px rgba(10,14,20,0.28);
+    font-size:0.85rem;
+    line-height:1.5;
+  }
+  #vocab-popup .vocab-word{
+    font-family:var(--font-serif);
+    font-weight:700;
+    font-size:1.02rem;
+    color:#fff;
+    margin-bottom:4px;
+    display:block;
+  }
+  #vocab-popup .vocab-meaning{ color:#D7DEDC; display:block; }
+  #vocab-popup.no-def .vocab-meaning{ color:#B9C2C0; font-style:italic; }
+  #vocab-popup .vocab-close{
+    position:absolute; top:6px; right:8px;
+    background:none; border:none; color:#9AA6A3;
+    font-size:0.9rem; line-height:1; padding:2px 4px;
+  }
+  #vocab-popup .vocab-close:hover{ color:#fff; }
+
+  /* =========================================================
+     RESPONSIVE
+  ========================================================= */
+  @media (max-width:640px){
+    .topbar{ padding:12px 16px; }
+    .brand h1{ font-size:1.05rem; }
+    .status-cluster{ gap:14px; }
+    .controlbar{ padding:12px 16px; top:56px; position:static; }
+    .topbar{ position:static; }
+    main{ padding:20px 16px; }
+    .grid{ grid-template-columns:1fr; gap:16px; }
+    .reading-card{ padding:18px 16px 20px; }
+    .card-head{ flex-direction:column; align-items:flex-start; gap:6px; }
+    .meta-info{ text-align:left; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============================================================
+       TOP BAR
+  ============================================================= -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="mark">RL</span>
+      <div>
+        <h1>Reading Lab</h1>
+        <div class="tagline">Práctica de lectura y comprensión en inglés</div>
+      </div>
+    </div>
+    <div class="status-cluster">
+      <div class="status-item">
+        <span class="dot" id="autosave-dot"></span>
+        <span id="autosave-label">Todo guardado</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Sesión</span>
+        <span class="timer" id="session-timer">00:00</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       CONTROL BAR — filtros de nivel + búsqueda
+  ============================================================= -->
+  <div class="controlbar">
+    <div class="level-filters" id="level-filters">
+      <button class="filter-btn active" data-level="all">Todos</button>
+      <button class="filter-btn" data-level="A">Nivel A · Básico</button>
+      <button class="filter-btn" data-level="B">Nivel B · Intermedio</button>
+      <button class="filter-btn" data-level="C">Nivel C · Avanzado</button>
+    </div>
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="search-input" placeholder="Buscar lectura por título…" autocomplete="off">
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MAIN CONTENT
+  ============================================================= -->
+  <main>
+    <div class="intro-row">
+      <h2>Lecturas disponibles</h2>
+      <span class="count" id="result-count"></span>
+    </div>
+    <div class="grid" id="reading-grid"></div>
+    <div class="empty-state" id="empty-state">No se encontraron lecturas con ese título o nivel. Prueba con otra palabra clave.</div>
+  </main>
+
+  <!-- Floating vocabulary popup (reused for every word click) -->
+  <div id="vocab-popup">
+    <button class="vocab-close" id="vocab-close" aria-label="Cerrar">✕</button>
+    <span class="vocab-word"></span>
+    <span class="vocab-meaning"></span>
+  </div>
+
+<script>
+/* =========================================================================
+   1. BASE DE DATOS INTERNA — Lecturas, glosarios y preguntas
+   ========================================================================= */
+
+// Diccionario de palabras comunes (artículos, pronombres, conectores, verbos
+// auxiliares...) para que absolutamente cualquier palabra del texto tenga
+// una traducción al hacer clic, incluso si no aparece en el glosario propio
+// de cada lectura.
+const commonWords = {
+  "the":"el / la / los / las", "a":"un / una", "an":"un / una (antes de vocal)",
+  "and":"y", "but":"pero", "or":"o", "of":"de", "to":"a / hacia / para",
+  "in":"en", "on":"sobre / en", "at":"en (un lugar/hora)", "is":"es / está",
+  "are":"son / están", "was":"era / estaba (pasado)", "were":"eran / estaban (pasado)",
+  "be":"ser / estar", "been":"sido / estado", "being":"siendo / estando",
+  "have":"tener / haber", "has":"tiene / ha", "had":"tenía / había",
+  "do":"hacer (auxiliar)", "does":"hace (auxiliar, 3ª pers.)", "did":"hizo (auxiliar, pasado)",
+  "will":"verbo auxiliar de futuro", "would":"verbo auxiliar condicional",
+  "can":"poder / puede", "could":"podía / podría", "should":"debería",
+  "my":"mi(s)", "your":"tu(s)", "his":"su (de él)", "her":"su (de ella)",
+  "its":"su (de eso)", "our":"nuestro(s)", "their":"su(s) (de ellos)",
+  "i":"yo", "you":"tú / usted", "he":"él", "she":"ella", "it":"eso / ello",
+  "we":"nosotros", "they":"ellos / ellas",
+  "this":"este / esta", "that":"ese / aquel", "these":"estos", "those":"aquellos",
+  "with":"con", "for":"para / durante", "from":"desde / de", "by":"por / junto a",
+  "as":"como", "not":"no", "no":"no / ninguno", "so":"así que / tan",
+  "if":"si (condicional)", "when":"cuando", "while":"mientras", "because":"porque",
+  "than":"que (comparación)", "then":"entonces", "there":"allí / ahí", "here":"aquí",
+  "all":"todo(s)", "some":"algunos", "any":"cualquiera / alguno", "more":"más",
+  "most":"la mayoría / más", "very":"muy", "just":"solo / justo", "also":"también",
+  "about":"acerca de / sobre", "after":"después de", "before":"antes de",
+  "over":"sobre / por encima", "under":"debajo de", "between":"entre",
+  "into":"hacia dentro de", "out":"fuera", "up":"arriba / hacia arriba",
+  "down":"abajo / hacia abajo", "near":"cerca de", "every":"cada",
+  "each":"cada uno", "other":"otro", "another":"otro (adicional)",
+  "one":"uno", "two":"dos", "three":"tres", "first":"primero", "last":"último",
+  "new":"nuevo", "old":"viejo / antiguo", "good":"bueno", "great":"excelente / genial",
+  "small":"pequeño", "large":"grande", "own":"propio", "same":"mismo",
+  "different":"diferente", "both":"ambos", "many":"muchos", "much":"mucho",
+  "few":"pocos", "little":"poco / pequeño", "who":"quién", "what":"qué",
+  "where":"dónde", "why":"por qué", "how":"cómo", "which":"cuál",
+  "begins":"comienza", "begin":"comenzar", "began":"comenzó",
+  "always":"siempre", "never":"nunca", "still":"todavía", "even":"incluso",
+  "only":"solo / únicamente", "now":"ahora", "today":"hoy",
+  "am":"soy / estoy", "than":"que", "us":"nos / a nosotros", "them":"los / les (a ellos)",
+  "him":"lo / le (a él)", "me":"me / a mí", "off":"apagado / fuera",
+  "through":"a través de", "during":"durante", "against":"contra",
+  "toward":"hacia", "towards":"hacia", "within":"dentro de",
+  "without":"sin", "around":"alrededor de", "along":"a lo largo de",
+  "must":"deber (obligación)", "may":"puede que / poder",
+  "might":"podría (posibilidad)", "since":"desde / ya que",
+  "until":"hasta", "yet":"aún / sin embargo", "though":"aunque",
+  "although":"aunque", "thus":"así / por lo tanto",
+  "however":"sin embargo", "therefore":"por lo tanto",
+  "such":"tal / semejante", "less":"menos", "least":"lo menos",
+  "once":"una vez", "again":"otra vez", "soon":"pronto",
+  "does":"hace", "having":"teniendo", "doing":"haciendo",
+  "didnt":"no + verbo en pasado (forma negativa de 'did')",
+  "isnt":"no es / no está", "wasnt":"no era / no estaba",
+  "dont":"no + verbo (forma negativa de 'do')",
+  "im":"yo soy / estoy", "its":"su / de eso"
+};
+
+// Cada lectura contiene: nivel, título, subtítulo, texto en inglés,
+// traducción completa, glosario propio (palabras clave) y preguntas
+// de comprensión.
+const readings = [
+
+  /* ---------------------------- NIVEL A ---------------------------- */
+  {
+    id:"a1", level:"A",
+    title:"A Day at the Beach",
+    subtitle:"Un relato sencillo sobre un día de verano en familia.",
+    text:`Every summer, my family visits a small beach near our town. We wake up early and pack a large basket with sandwiches, fruit, and cold water. The drive takes about thirty minutes, and my little brother always sings songs in the car. When we arrive, the sand is warm and the waves are calm. My sister and I build sandcastles while our parents read books under a blue umbrella. At noon, we eat lunch together and watch the seagulls fly above the water. In the afternoon, we swim and play volleyball with other families. The sun begins to set, and the sky turns orange and pink. We collect shells before we leave. On the way home, everyone is tired but happy. These simple days at the beach are some of my favorite memories.`,
+    translation:`Cada verano, mi familia visita una pequeña playa cerca de nuestro pueblo. Nos levantamos temprano y empacamos una canasta grande con sándwiches, fruta y agua fría. El viaje toma unos treinta minutos, y mi hermano pequeño siempre canta canciones en el auto. Cuando llegamos, la arena está tibia y las olas están tranquilas. Mi hermana y yo construimos castillos de arena mientras nuestros padres leen libros bajo una sombrilla azul. Al mediodía, almorzamos juntos y observamos a las gaviotas volar sobre el agua. Por la tarde, nadamos y jugamos voleibol con otras familias. El sol comienza a ponerse, y el cielo se vuelve naranja y rosado. Recogemos conchas antes de irnos. En el camino a casa, todos están cansados pero felices. Estos días sencillos en la playa son algunos de mis recuerdos favoritos.`,
+    glossary:{
+      "visits":"visita", "family":"familia", "wake":"despertar", "pack":"empacar",
+      "basket":"canasta", "sandwiches":"sándwiches", "drive":"trayecto en auto",
+      "arrive":"llegar", "sand":"arena", "waves":"olas", "calm":"tranquilo(a)",
+      "sandcastles":"castillos de arena", "umbrella":"sombrilla", "noon":"mediodía",
+      "seagulls":"gaviotas", "swim":"nadar", "volleyball":"voleibol",
+      "sun":"sol", "collect":"recoger", "shells":"conchas", "tired":"cansado(a)",
+      "memories":"recuerdos"
+    },
+    questions:[
+      {
+        q:"According to the text, what do the siblings do first when they arrive at the beach?",
+        options:["They swim in the water","They eat lunch","They build sandcastles while their parents read","They play volleyball"],
+        correct:2,
+        explanation:"El texto dice: 'My sister and I build sandcastles while our parents read books'."
+      },
+      {
+        q:"What color does the sky turn in the late afternoon?",
+        options:["Blue and white","Orange and pink","Grey and black","Purple and green"],
+        correct:1,
+        explanation:"El texto indica: 'the sky turns orange and pink'."
+      }
+    ]
+  },
+
+  {
+    id:"a2", level:"A",
+    title:"My New Neighborhood",
+    subtitle:"Una descripción amigable sobre adaptarse a un nuevo hogar.",
+    text:`Two months ago, my family moved to a new neighborhood in the city. At first, everything felt strange because I didn't know anyone. Now, I am starting to feel at home. There is a small bakery on the corner that sells fresh bread every morning. The smell fills the whole street. Next to the bakery, there is a park with tall trees and a playground for children. I like to walk there after school and sit on a bench to read. My neighbors are friendly, and one family has a dog named Max who always barks when he sees me. On Saturdays, there is a small market where people sell vegetables, flowers, and handmade crafts. My mother buys fresh tomatoes there every week. I am slowly making new friends, and I think I will enjoy living here.`,
+    translation:`Hace dos meses, mi familia se mudó a un nuevo vecindario en la ciudad. Al principio, todo se sentía extraño porque no conocía a nadie. Ahora, estoy empezando a sentirme como en casa. Hay una pequeña panadería en la esquina que vende pan fresco cada mañana. El aroma llena toda la calle. Junto a la panadería, hay un parque con árboles altos y un área de juegos para niños. Me gusta caminar allí después de la escuela y sentarme en una banca a leer. Mis vecinos son amables, y una familia tiene un perro llamado Max que siempre ladra cuando me ve. Los sábados, hay un pequeño mercado donde la gente vende verduras, flores y artesanías hechas a mano. Mi madre compra tomates frescos allí cada semana. Poco a poco estoy haciendo nuevos amigos, y creo que voy a disfrutar vivir aquí.`,
+    glossary:{
+      "moved":"se mudó", "neighborhood":"vecindario", "strange":"extraño",
+      "bakery":"panadería", "corner":"esquina", "smell":"aroma / olor",
+      "playground":"área de juegos", "bench":"banca", "neighbors":"vecinos",
+      "friendly":"amable(s)", "barks":"ladra", "market":"mercado",
+      "vegetables":"verduras", "flowers":"flores", "handmade":"hecho a mano",
+      "crafts":"artesanías", "tomatoes":"tomates", "slowly":"poco a poco"
+    },
+    questions:[
+      {
+        q:"What does the bakery sell every morning?",
+        options:["Vegetables","Fresh bread","Flowers","Toys"],
+        correct:1,
+        explanation:"El texto dice: 'a small bakery on the corner that sells fresh bread every morning'."
+      },
+      {
+        q:"What is the name of the neighbor's dog?",
+        options:["Rex","Buddy","Max","Charlie"],
+        correct:2,
+        explanation:"El texto menciona: 'one family has a dog named Max'."
+      }
+    ]
+  },
+
+  {
+    id:"a3", level:"A",
+    title:"The School Library",
+    subtitle:"Un momento tranquilo entre libros y descubrimientos.",
+    text:`Every Tuesday afternoon, our teacher takes us to the school library. The room is quiet, and tall shelves are full of colorful books. I always look for adventure stories with maps and pirates. My best friend prefers books about animals, especially dogs and horses. The librarian, Mrs. Chen, knows every book by its cover. She helps us find new stories and always smiles when we ask questions. Sometimes she reads a short story aloud to the whole class before we choose our own books. After we pick our books, we sit at small round tables and read quietly for twenty minutes. I usually finish one book and start another the same week. Before we leave, we return the books we already read. The library is my favorite part of the school day.`,
+    translation:`Todos los martes por la tarde, nuestra maestra nos lleva a la biblioteca de la escuela. La sala está en silencio, y hay estantes altos llenos de libros coloridos. Siempre busco historias de aventuras con mapas y piratas. Mi mejor amigo prefiere libros sobre animales, especialmente perros y caballos. La bibliotecaria, la señora Chen, conoce cada libro por su portada. Nos ayuda a encontrar nuevas historias y siempre sonríe cuando hacemos preguntas. A veces lee un cuento corto en voz alta para toda la clase antes de que elijamos nuestros propios libros. Después de escoger nuestros libros, nos sentamos en mesas redondas pequeñas y leemos en silencio durante veinte minutos. Normalmente termino un libro y empiezo otro la misma semana. Antes de irnos, devolvemos los libros que ya leímos. La biblioteca es mi parte favorita del día escolar.`,
+    glossary:{
+      "library":"biblioteca", "shelves":"estantes", "adventure":"aventura",
+      "pirates":"piratas", "librarian":"bibliotecaria", "cover":"portada",
+      "aloud":"en voz alta", "quietly":"en silencio", "finish":"terminar",
+      "return":"devolver", "favorite":"favorito(a)", "quiet":"tranquilo(a)"
+    },
+    questions:[
+      { q:"What does the librarian do before the students choose their own books?",
+        options:["She cleans the shelves","She reads a short story aloud","She gives a test","She closes the library"],
+        correct:1, explanation:"El texto dice: 'she reads a short story aloud to the whole class before we choose our own books'." },
+      { q:"Where do students sit after picking their books?",
+        options:["On the floor","At small round tables","Outside in the garden","In the hallway"],
+        correct:1, explanation:"El texto indica: 'we sit at small round tables and read quietly'." }
+    ]
+  },
+
+  {
+    id:"a4", level:"A",
+    title:"Grandma's Garden",
+    subtitle:"Domingos de tierra, flores y limonada en familia.",
+    text:`Every Sunday, I visit my grandmother's house, and we spend the morning in her garden. She grows tomatoes, peppers, and bright yellow sunflowers along the back fence. A big oak tree gives shade to a wooden bench where we sit and talk. Grandma teaches me the names of different plants and how much water each one needs. My favorite part is picking fresh strawberries and eating them right there in the garden. Bees and butterflies visit the flowers all morning, and sometimes a rabbit hops across the grass. After we finish working, Grandma makes lemonade, and we drink it together under the tree. She says a garden teaches patience because plants grow slowly, one day at a time. I hope to have a garden like hers when I am older.`,
+    translation:`Cada domingo, visito la casa de mi abuela, y pasamos la mañana en su jardín. Ella cultiva tomates, pimientos y girasoles amarillos brillantes a lo largo de la cerca trasera. Un gran roble da sombra a una banca de madera donde nos sentamos a conversar. La abuela me enseña los nombres de diferentes plantas y cuánta agua necesita cada una. Mi parte favorita es recoger fresas frescas y comerlas ahí mismo en el jardín. Las abejas y mariposas visitan las flores toda la mañana, y a veces un conejo salta por el pasto. Después de terminar de trabajar, la abuela prepara limonada, y la bebemos juntas bajo el árbol. Ella dice que un jardín enseña paciencia porque las plantas crecen despacio, un día a la vez. Espero tener un jardín como el suyo cuando sea mayor.`,
+    glossary:{
+      "garden":"jardín", "tomatoes":"tomates", "peppers":"pimientos",
+      "sunflowers":"girasoles", "fence":"cerca", "shade":"sombra",
+      "bench":"banca", "strawberries":"fresas", "bees":"abejas",
+      "butterflies":"mariposas", "patience":"paciencia", "slowly":"despacio"
+    },
+    questions:[
+      { q:"What does Grandma teach the narrator about plants?",
+        options:["How to sell them","The names of plants and how much water they need","How to paint flowers","How to build a fence"],
+        correct:1, explanation:"El texto dice: 'Grandma teaches me the names of different plants and how much water each one needs'." },
+      { q:"What does Grandma say a garden teaches?",
+        options:["Speed","Patience","Math","Cooking"],
+        correct:1, explanation:"El texto indica: 'a garden teaches patience because plants grow slowly'." }
+    ]
+  },
+
+  {
+    id:"a5", level:"A",
+    title:"A Rainy Saturday",
+    subtitle:"Un día en casa que se convirtió en una gran aventura.",
+    text:`Last Saturday, it rained all day, so my brother and I stayed inside. At first, we felt bored because we couldn't play outside. Then, our mother suggested a board game, and we quickly agreed. We played for almost two hours and laughed a lot when my brother lost three times in a row. Later, we baked cookies together, and the kitchen smelled like chocolate and vanilla. While the cookies cooled, we watched the raindrops race down the window. In the afternoon, we built a small blanket fort in the living room and read comic books inside it with a flashlight. Even though we couldn't go outside, it turned out to be a fun day. Sometimes the best memories happen on days you didn't plan.`,
+    translation:`El sábado pasado, llovió todo el día, así que mi hermano y yo nos quedamos adentro. Al principio, nos sentimos aburridos porque no podíamos jugar afuera. Luego, nuestra madre sugirió un juego de mesa, y aceptamos rápidamente. Jugamos casi dos horas y nos reímos mucho cuando mi hermano perdió tres veces seguidas. Más tarde, horneamos galletas juntos, y la cocina olía a chocolate y vainilla. Mientras las galletas se enfriaban, vimos cómo las gotas de lluvia competían por bajar en la ventana. Por la tarde, construimos un pequeño fuerte de mantas en la sala y leímos cómics adentro con una linterna. Aunque no pudimos salir, resultó ser un día divertido. A veces los mejores recuerdos ocurren en días que no planeaste.`,
+    glossary:{
+      "rained":"llovió", "bored":"aburrido(a)", "suggested":"sugirió",
+      "agreed":"aceptamos / estuvimos de acuerdo", "laughed":"nos reímos",
+      "baked":"horneamos", "cookies":"galletas", "smelled":"olía",
+      "raindrops":"gotas de lluvia", "fort":"fuerte", "flashlight":"linterna",
+      "memories":"recuerdos"
+    },
+    questions:[
+      { q:"What did the family do first to stop feeling bored?",
+        options:["Baked cookies","Played a board game","Built a fort","Watched a movie"],
+        correct:1, explanation:"El texto dice: 'our mother suggested a board game, and we quickly agreed'." },
+      { q:"What did the children build in the living room?",
+        options:["A tent","A blanket fort","A sandcastle","A treehouse"],
+        correct:1, explanation:"El texto indica: 'we built a small blanket fort in the living room'." }
+    ]
+  },
+
+  {
+    id:"a6", level:"A",
+    title:"My Favorite Sport",
+    subtitle:"Baloncesto, práctica constante y nuevos amigos.",
+    text:`Basketball is my favorite sport, and I practice almost every day after school. My older cousin taught me how to dribble and shoot when I was seven years old. Now, I play on a team with ten other kids from my neighborhood. We practice twice a week in the community gym and have games on Saturday mornings. My coach always reminds us that teamwork is more important than scoring points alone. Last month, our team won a small tournament, and everyone celebrated with pizza afterward. I am not the tallest player, but I am fast, and I work hard on defense. My goal this year is to improve my free throws, so I shoot extra baskets every evening in my driveway. Basketball has also helped me make many new friends.`,
+    translation:`El baloncesto es mi deporte favorito, y practico casi todos los días después de la escuela. Mi primo mayor me enseñó a driblar y lanzar cuando tenía siete años. Ahora, juego en un equipo con otros diez niños de mi vecindario. Practicamos dos veces por semana en el gimnasio comunitario y tenemos partidos los sábados por la mañana. Mi entrenador siempre nos recuerda que el trabajo en equipo es más importante que anotar puntos solo. El mes pasado, nuestro equipo ganó un pequeño torneo, y todos celebramos con pizza después. No soy el jugador más alto, pero soy rápido, y trabajo duro en la defensa. Mi meta este año es mejorar mis tiros libres, así que lanzo canastas extra cada tarde en mi entrada de auto. El baloncesto también me ha ayudado a hacer muchos nuevos amigos.`,
+    glossary:{
+      "basketball":"baloncesto", "dribble":"driblar", "shoot":"lanzar / disparar",
+      "team":"equipo", "practice":"practicar", "coach":"entrenador(a)",
+      "teamwork":"trabajo en equipo", "tournament":"torneo",
+      "celebrated":"celebramos", "defense":"defensa", "goal":"meta",
+      "driveway":"entrada de auto"
+    },
+    questions:[
+      { q:"What does the coach say is more important than scoring points alone?",
+        options:["Speed","Teamwork","Height","Shooting"],
+        correct:1, explanation:"El texto dice: 'teamwork is more important than scoring points alone'." },
+      { q:"What is the narrator's goal for this year?",
+        options:["To join a new team","To improve free throws","To become the tallest player","To stop playing basketball"],
+        correct:1, explanation:"El texto indica: 'My goal this year is to improve my free throws'." }
+    ]
+  },
+
+  {
+    id:"a7", level:"A",
+    title:"The Lost Cat",
+    subtitle:"Una tarde de búsqueda, preocupación y alivio familiar.",
+    text:`Yesterday morning, our cat Whiskers did not come home for breakfast, and my whole family became worried. We searched the backyard and called his name, but he did not appear. My sister made small paper posters with his photo and our phone number, and we put them on trees around the neighborhood. Our neighbor, Mr. Patel, said he saw a cat that looked like Whiskers near the old garage two streets away. We walked there together and looked behind some boxes. Finally, we heard a soft meow coming from under a wooden porch. Whiskers was hiding there, tired and hungry but safe. My little brother started crying from happiness when we found him. We carried him home carefully and gave him extra food. Since that day, we always check that the door is closed.`,
+    translation:`Ayer por la mañana, nuestro gato Whiskers no vino a desayunar, y toda mi familia se preocupó. Buscamos en el patio trasero y lo llamamos por su nombre, pero no apareció. Mi hermana hizo pequeños carteles de papel con su foto y nuestro número de teléfono, y los pusimos en árboles por el vecindario. Nuestro vecino, el señor Patel, dijo que vio un gato parecido a Whiskers cerca del garaje viejo, dos calles más allá. Caminamos hasta allí juntos y miramos detrás de unas cajas. Finalmente, escuchamos un suave maullido que venía de debajo de un porche de madera. Whiskers estaba escondido ahí, cansado y hambriento pero a salvo. Mi hermano pequeño empezó a llorar de felicidad cuando lo encontramos. Lo llevamos a casa con cuidado y le dimos comida extra. Desde ese día, siempre revisamos que la puerta esté cerrada.`,
+    glossary:{
+      "worried":"preocupado(a)", "searched":"buscamos", "posters":"carteles",
+      "neighbor":"vecino(a)", "garage":"garaje", "meow":"maullido",
+      "porch":"porche", "hiding":"escondido(a)", "hungry":"hambriento(a)",
+      "carefully":"con cuidado", "closed":"cerrado(a)", "safe":"a salvo"
+    },
+    questions:[
+      { q:"Who told the family where they might find the cat?",
+        options:["A police officer","Mr. Patel, the neighbor","The school teacher","A stranger"],
+        correct:1, explanation:"El texto dice: 'Our neighbor, Mr. Patel, said he saw a cat that looked like Whiskers'." },
+      { q:"Where was Whiskers finally found?",
+        options:["In the garage","Under a wooden porch","In a tree","At school"],
+        correct:1, explanation:"El texto indica: 'we heard a soft meow coming from under a wooden porch'." }
+    ]
+  },
+
+  {
+    id:"a8", level:"A",
+    title:"Breakfast with Dad",
+    subtitle:"Panqueques con forma de estrella y viejas historias de familia.",
+    text:`On Sunday mornings, my dad and I make breakfast together while the rest of the family sleeps a little longer. He lets me crack the eggs, even though I sometimes drop small pieces of shell into the bowl. We make pancakes shaped like animals, and I always ask for a pancake shaped like a star. While the food cooks, Dad tells funny stories about when he was a child, and I laugh even when I have heard the story before. We set the table together and put orange juice in four cups. When everyone wakes up, we all eat breakfast and talk about our plans for the day. My dad says these mornings are his favorite part of the week, and honestly, they are mine too.`,
+    translation:`Los domingos por la mañana, mi papá y yo preparamos el desayuno juntos mientras el resto de la familia duerme un poco más. Él me deja romper los huevos, aunque a veces se me caen pequeños trozos de cáscara en el tazón. Hacemos panqueques con forma de animales, y siempre pido un panqueque con forma de estrella. Mientras la comida se cocina, papá cuenta historias graciosas de cuando era niño, y me río incluso cuando ya he escuchado la historia antes. Ponemos la mesa juntos y servimos jugo de naranja en cuatro vasos. Cuando todos despiertan, comemos el desayuno juntos y hablamos sobre nuestros planes para el día. Mi papá dice que estas mañanas son su parte favorita de la semana, y sinceramente, también son la mía.`,
+    glossary:{
+      "crack":"romper", "shell":"cáscara", "pancakes":"panqueques",
+      "shaped":"con forma de", "cooks":"se cocina", "laugh":"reír",
+      "table":"mesa", "plans":"planes", "favorite":"favorito(a)",
+      "honestly":"sinceramente", "mornings":"mañanas"
+    },
+    questions:[
+      { q:"What shape of pancake does the narrator always ask for?",
+        options:["A circle","A heart","A star","A square"],
+        correct:2, explanation:"El texto dice: 'I always ask for a pancake shaped like a star'." },
+      { q:"What does Dad do while the food cooks?",
+        options:["He reads the newspaper","He tells funny stories from his childhood","He calls a friend","He washes dishes"],
+        correct:1, explanation:"El texto indica: 'Dad tells funny stories about when he was a child'." }
+    ]
+  },
+
+  {
+    id:"a9", level:"A",
+    title:"A Trip to the Zoo",
+    subtitle:"Jirafas, pingüinos y un paseo escolar inolvidable.",
+    text:`Our class took a bus trip to the city zoo on a sunny Friday morning. As soon as we arrived, we heard the loud roar of a lion coming from across the park. Our teacher divided us into small groups, and each group had a map to follow. My favorite animals were the giraffes because they were much taller than I expected, and one of them ate leaves right in front of us. We also watched the penguins swim quickly underwater in their large glass tank. At lunchtime, we sat at picnic tables and shared sandwiches while birds walked nearby, hoping for crumbs. In the afternoon, we visited the reptile house, where a snake moved slowly behind the glass. Before leaving, we bought small souvenirs at the gift shop. It was one of the best school trips of the year.`,
+    translation:`Nuestra clase hizo un viaje en autobús al zoológico de la ciudad un viernes soleado por la mañana. Tan pronto llegamos, escuchamos el fuerte rugido de un león que venía desde el otro lado del parque. Nuestra maestra nos dividió en grupos pequeños, y cada grupo tenía un mapa para seguir. Mis animales favoritos fueron las jirafas porque eran mucho más altas de lo que esperaba, y una de ellas comió hojas justo frente a nosotros. También observamos a los pingüinos nadar rápidamente bajo el agua en su gran tanque de vidrio. A la hora del almuerzo, nos sentamos en mesas de picnic y compartimos sándwiches mientras las aves caminaban cerca, esperando migajas. Por la tarde, visitamos la casa de reptiles, donde una serpiente se movía lentamente detrás del vidrio. Antes de irnos, compramos pequeños souvenirs en la tienda de regalos. Fue uno de los mejores viajes escolares del año.`,
+    glossary:{
+      "roar":"rugido", "lion":"león", "divided":"dividió",
+      "giraffes":"jirafas", "leaves":"hojas", "penguins":"pingüinos",
+      "tank":"tanque", "picnic":"picnic", "crumbs":"migajas",
+      "reptile":"reptil", "souvenirs":"souvenirs / recuerdos", "gift shop":"tienda de regalos"
+    },
+    questions:[
+      { q:"Why were the giraffes the narrator's favorite animals?",
+        options:["Because they could fly","Because they were much taller than expected","Because they were pink","Because they could talk"],
+        correct:1, explanation:"El texto dice: 'they were much taller than I expected'." },
+      { q:"What did the students do at lunchtime?",
+        options:["They visited the reptile house","They sat at picnic tables and shared sandwiches","They rode a roller coaster","They went home"],
+        correct:1, explanation:"El texto indica: 'we sat at picnic tables and shared sandwiches'." }
+    ]
+  },
+
+  {
+    id:"a10", level:"A",
+    title:"The New Student",
+    subtitle:"Un simple 'hola' que se convirtió en una gran amistad.",
+    text:`A new student named Sofia joined our class last week, and she sat at the empty desk next to mine. On her first day, she looked nervous and did not talk much during class. At lunch, I noticed she was sitting alone, so I walked over and asked if she wanted to sit with my friends and me. She smiled and said yes. We learned that Sofia had just moved from another country, and she spoke two languages, English and Portuguese. She taught us a few words in Portuguese, and we all tried to repeat them, which made everyone laugh at our pronunciation. By the end of the week, Sofia was laughing and joking with us like she had always been part of the class. Now she is one of my closest friends, and I am glad I said hello on that first day.`,
+    translation:`Una nueva estudiante llamada Sofía se unió a nuestra clase la semana pasada, y se sentó en el pupitre vacío junto al mío. En su primer día, se veía nerviosa y no habló mucho durante la clase. A la hora del almuerzo, noté que estaba sentada sola, así que me acerqué y le pregunté si quería sentarse con mis amigos y conmigo. Ella sonrió y dijo que sí. Descubrimos que Sofía se acababa de mudar de otro país, y hablaba dos idiomas, inglés y portugués. Nos enseñó algunas palabras en portugués, y todos intentamos repetirlas, lo cual hizo que todos se rieran de nuestra pronunciación. Al final de la semana, Sofía se reía y bromeaba con nosotros como si siempre hubiera sido parte de la clase. Ahora ella es una de mis amigas más cercanas, y me alegra haber dicho hola ese primer día.`,
+    glossary:{
+      "nervous":"nervioso(a)", "alone":"sola / solo", "moved":"se mudó",
+      "languages":"idiomas", "taught":"enseñó", "pronunciation":"pronunciación",
+      "laughing":"riendo", "joking":"bromeando", "closest":"más cercano(a)",
+      "joined":"se unió", "smiled":"sonrió", "noticed":"noté"
+    },
+    questions:[
+      { q:"What did the narrator do when they noticed Sofia sitting alone at lunch?",
+        options:["Ignored her","Invited her to sit with them","Told the teacher","Left the cafeteria"],
+        correct:1, explanation:"El texto dice: 'I walked over and asked if she wanted to sit with my friends and me'." },
+      { q:"What two languages does Sofia speak?",
+        options:["English and French","Spanish and English","English and Portuguese","Portuguese and French"],
+        correct:2, explanation:"El texto indica: 'she spoke two languages, English and Portuguese'." }
+    ]
+  },
+
+  {
+    id:"a11", level:"A",
+    title:"A Weekend at the Farm",
+    subtitle:"Gallinas, vacas y caballos en un fin de semana activo.",
+    text:`Last weekend, my cousins and I visited our uncle's farm for the first time in a year. Early in the morning, we helped feed the chickens and collect fresh eggs from the henhouse. The eggs were still warm, and some were surprisingly large. Later, my uncle taught us how to milk a cow, which was harder than it looked. We laughed a lot when the cow moved and spilled a little milk on my cousin's shoes. In the afternoon, we rode in a small cart pulled by two horses around the fields. The wind felt cool, and the fields smelled like fresh grass and hay. Before dinner, we picked ripe apples from a small orchard near the barn. That night, we ate a big meal made mostly from food grown on the farm. I fell asleep quickly, tired but happy from such an active day.`,
+    translation:`El fin de semana pasado, mis primos y yo visitamos la granja de nuestro tío por primera vez en un año. Temprano en la mañana, ayudamos a alimentar a las gallinas y a recoger huevos frescos del gallinero. Los huevos todavía estaban tibios, y algunos eran sorprendentemente grandes. Más tarde, mi tío nos enseñó a ordeñar una vaca, lo cual fue más difícil de lo que parecía. Nos reímos mucho cuando la vaca se movió y derramó un poco de leche sobre los zapatos de mi primo. Por la tarde, viajamos en un pequeño carro tirado por dos caballos alrededor de los campos. El viento se sentía fresco, y los campos olían a pasto fresco y heno. Antes de la cena, recogimos manzanas maduras de un pequeño huerto cerca del granero. Esa noche, comimos una gran cena hecha principalmente con alimentos cultivados en la granja. Me quedé dormido rápidamente, cansado pero feliz por un día tan activo.`,
+    glossary:{
+      "farm":"granja", "chickens":"gallinas", "henhouse":"gallinero",
+      "milk":"ordeñar / leche", "cow":"vaca", "spilled":"derramó",
+      "cart":"carro / carreta", "fields":"campos", "hay":"heno",
+      "ripe":"maduro(a)", "orchard":"huerto", "barn":"granero"
+    },
+    questions:[
+      { q:"What did the family do early in the morning?",
+        options:["Rode horses","Fed chickens and collected eggs","Picked apples","Cooked dinner"],
+        correct:1, explanation:"El texto dice: 'we helped feed the chickens and collect fresh eggs from the henhouse'." },
+      { q:"What happened when the cow moved while being milked?",
+        options:["It ran away","It spilled milk on a cousin's shoes","It knocked over the cart","Nothing happened"],
+        correct:1, explanation:"El texto indica: 'the cow moved and spilled a little milk on my cousin's shoes'." }
+    ]
+  },
+
+  {
+    id:"a12", level:"A",
+    title:"The School Talent Show",
+    subtitle:"Nervios, una guitarra y el orgullo de intentarlo por primera vez.",
+    text:`Every spring, our school organizes a talent show, and this year I decided to participate for the first time. I practiced playing the guitar for almost a month, choosing a simple song that I knew well. On the day of the show, I felt very nervous backstage, and my hands were shaking slightly. When it was my turn, I walked onto the stage and saw many faces in the audience, including my parents smiling near the front row. I took a deep breath and started playing. Halfway through the song, I forgot one small part, but I kept playing and nobody seemed to notice. When I finished, everyone clapped loudly, and I felt proud of myself for trying something new. Other students sang, danced, or told jokes, and the whole event lasted about two hours. Afterward, my teacher said she was impressed that I performed despite feeling nervous. I am already planning what to play next year.`,
+    translation:`Cada primavera, nuestra escuela organiza un show de talentos, y este año decidí participar por primera vez. Practiqué tocando la guitarra durante casi un mes, eligiendo una canción sencilla que conocía bien. El día del show, me sentí muy nervioso detrás del escenario, y mis manos temblaban un poco. Cuando llegó mi turno, caminé hacia el escenario y vi muchas caras entre el público, incluyendo a mis padres sonriendo cerca de la primera fila. Respiré profundo y comencé a tocar. A la mitad de la canción, olvidé una pequeña parte, pero seguí tocando y nadie pareció notarlo. Cuando terminé, todos aplaudieron fuerte, y me sentí orgulloso de mí mismo por intentar algo nuevo. Otros estudiantes cantaron, bailaron o contaron chistes, y todo el evento duró unas dos horas. Después, mi maestra dijo que estaba impresionada de que yo actuara a pesar de sentirme nervioso. Ya estoy planeando qué tocar el próximo año.`,
+    glossary:{
+      "talent show":"show de talentos", "guitar":"guitarra", "nervous":"nervioso(a)",
+      "backstage":"detrás del escenario", "shaking":"temblando", "audience":"público",
+      "breath":"respiración / aliento", "clapped":"aplaudieron", "proud":"orgulloso(a)",
+      "impressed":"impresionada", "forgot":"olvidé", "performed":"actué / interpreté"
+    },
+    questions:[
+      { q:"What instrument did the narrator practice for the talent show?",
+        options:["Piano","Guitar","Violin","Drums"],
+        correct:1, explanation:"El texto dice: 'I practiced playing the guitar for almost a month'." },
+      { q:"What happened halfway through the song?",
+        options:["The narrator stopped playing","The narrator forgot a small part but kept playing","The guitar broke","The audience left"],
+        correct:1, explanation:"El texto indica: 'Halfway through the song, I forgot one small part, but I kept playing'." }
+    ]
+  },
+
+  /* ---------------------------- NIVEL B ---------------------------- */
+  {
+    id:"b1", level:"B",
+    title:"The Silent Language of Cities",
+    subtitle:"Ensayo sobre cómo el diseño urbano comunica reglas invisibles.",
+    text:`Long before residents read a single street sign, a city has already begun to speak to them. The width of a sidewalk, the placement of a bench, or the height of a fence conveys a quiet message about who belongs where and how people are expected to behave. Urban planners call this phenomenon the silent language of cities, and it shapes daily life more than most people realize. A narrow, cracked pathway discourages pedestrians and subtly favors cars, while a wide, tree-lined boulevard invites strolling and conversation. Similarly, the presence of public seating in a plaza signals that lingering is welcome, whereas the absence of benches, sometimes a deliberate design choice, can discourage people from gathering in a particular area. Even lighting plays a role: well-lit streets tend to feel safer and more inviting after dark, while poorly lit corners are often avoided regardless of the actual crime rate. Architects and city officials increasingly recognize that these details are not neutral. They reflect priorities, and sometimes biases, about which groups of people a space is designed to serve. A growing movement in urban design now advocates for inclusive planning, where sidewalks, parks, and transit systems are built with the needs of children, elderly residents, and people with disabilities in mind from the very beginning. Understanding this silent language allows citizens to ask sharper questions about their surroundings: not simply whether a space looks attractive, but whom it was truly built for.`,
+    translation:`Mucho antes de que los residentes lean una sola señal de calle, una ciudad ya ha comenzado a hablarles. El ancho de una acera, la ubicación de una banca o la altura de una cerca transmite un mensaje silencioso sobre quién pertenece a cada lugar y cómo se espera que la gente se comporte. Los urbanistas llaman a este fenómeno el lenguaje silencioso de las ciudades, y moldea la vida diaria más de lo que la mayoría de las personas se da cuenta. Un camino estrecho y agrietado desalienta a los peatones y favorece sutilmente a los automóviles, mientras que un bulevar ancho y arbolado invita a pasear y conversar. De manera similar, la presencia de asientos públicos en una plaza indica que quedarse un rato es bienvenido, mientras que la ausencia de bancas, a veces una decisión de diseño deliberada, puede desalentar que la gente se reúna en cierta área. Incluso la iluminación juega un papel: las calles bien iluminadas suelen sentirse más seguras y acogedoras después del anochecer, mientras que las esquinas mal iluminadas a menudo se evitan sin importar la tasa real de criminalidad. Arquitectos y funcionarios de la ciudad reconocen cada vez más que estos detalles no son neutrales. Reflejan prioridades, y a veces prejuicios, sobre qué grupos de personas fueron pensados al diseñar un espacio. Un movimiento creciente en el diseño urbano ahora aboga por una planificación inclusiva, donde las aceras, los parques y los sistemas de transporte se construyen teniendo en cuenta desde el principio las necesidades de los niños, los adultos mayores y las personas con discapacidad. Comprender este lenguaje silencioso permite a los ciudadanos hacer preguntas más agudas sobre su entorno: no simplemente si un espacio se ve atractivo, sino para quién fue realmente construido.`,
+    glossary:{
+      "residents":"residentes", "sidewalk":"acera", "placement":"ubicación",
+      "fence":"cerca / valla", "conveys":"transmite", "phenomenon":"fenómeno",
+      "pathway":"camino / sendero", "discourages":"desalienta",
+      "pedestrians":"peatones", "boulevard":"bulevar", "strolling":"pasear",
+      "plaza":"plaza", "lingering":"quedarse / demorarse", "deliberate":"deliberado",
+      "gathering":"reunirse", "inviting":"acogedor", "avoided":"evitado",
+      "neutral":"neutral", "priorities":"prioridades", "biases":"prejuicios",
+      "advocates":"aboga / defiende", "inclusive":"inclusivo",
+      "transit":"transporte público", "disabilities":"discapacidades",
+      "surroundings":"entorno / alrededores"
+    },
+    questions:[
+      {
+        q:"According to the passage, what does the absence of public benches sometimes indicate?",
+        options:["A shortage of city budget","A deliberate choice to discourage gathering","A focus on children's needs","Poor street lighting"],
+        correct:1,
+        explanation:"El texto dice: 'the absence of benches, sometimes a deliberate design choice, can discourage people from gathering'."
+      },
+      {
+        q:"What does 'the silent language of cities' refer to, according to the text?",
+        options:["Street signs written in several languages","The unspoken messages sent by urban design choices","A new traffic law","Noise pollution regulations"],
+        correct:1,
+        explanation:"El texto define el fenómeno como los mensajes silenciosos transmitidos por elementos del diseño urbano, como aceras, bancas y cercas."
+      }
+    ]
+  },
+
+  {
+    id:"b2", level:"B",
+    title:"The Habit of Curiosity",
+    subtitle:"Un ensayo sobre por qué la curiosidad puede entrenarse como un hábito.",
+    text:`Psychologists have long debated what separates people who continue learning throughout their lives from those who stop growing intellectually after school ends. Increasingly, researchers point to a single trait: curiosity. Unlike raw intelligence, curiosity is not fixed at birth; it can be cultivated like a habit, strengthened through repetition and deliberate practice. Children display curiosity naturally, asking dozens of questions a day, yet many adults gradually lose this instinct as routines and responsibilities take over. Studies suggest that curious individuals tend to tolerate uncertainty better, approaching unfamiliar situations as puzzles rather than threats. This mindset makes them more resilient in the face of failure, since a mistake becomes simply another piece of information rather than a personal defeat. Educators who wish to nurture curiosity in their students often begin by rewarding good questions as much as correct answers, since the ability to ask a precise, thoughtful question is itself a skill. Workplaces are beginning to notice similar patterns: teams led by curious managers tend to generate more creative solutions, partly because employees feel safer admitting what they do not know. Cultivating curiosity, then, is not simply about acquiring more facts. It is about preserving a willingness to be surprised, to sit with an unanswered question a little longer before reaching for a quick, comfortable explanation. In a world that increasingly rewards fast answers, that patience may be curiosity's most valuable gift.`,
+    translation:`Los psicólogos han debatido durante mucho tiempo qué separa a las personas que siguen aprendiendo durante toda su vida de aquellas que dejan de crecer intelectualmente después de terminar la escuela. Cada vez más, los investigadores señalan un solo rasgo: la curiosidad. A diferencia de la inteligencia innata, la curiosidad no es fija desde el nacimiento; puede cultivarse como un hábito, fortalecida mediante la repetición y la práctica deliberada. Los niños muestran curiosidad de forma natural, haciendo docenas de preguntas al día, pero muchos adultos van perdiendo gradualmente este instinto a medida que las rutinas y las responsabilidades toman el control. Los estudios sugieren que las personas curiosas tienden a tolerar mejor la incertidumbre, enfrentando situaciones desconocidas como rompecabezas en lugar de amenazas. Esta mentalidad las hace más resilientes frente al fracaso, ya que un error se convierte simplemente en otro dato más, en lugar de una derrota personal. Los educadores que desean fomentar la curiosidad en sus estudiantes a menudo comienzan por premiar las buenas preguntas tanto como las respuestas correctas, ya que la capacidad de formular una pregunta precisa y reflexiva es en sí misma una habilidad. Los lugares de trabajo están comenzando a notar patrones similares: los equipos liderados por gerentes curiosos tienden a generar soluciones más creativas, en parte porque los empleados se sienten más seguros al admitir lo que no saben. Cultivar la curiosidad, entonces, no se trata simplemente de acumular más datos. Se trata de preservar la disposición a sorprenderse, a quedarse con una pregunta sin responder un poco más de tiempo antes de recurrir a una explicación rápida y cómoda. En un mundo que cada vez premia más las respuestas rápidas, esa paciencia puede ser el regalo más valioso de la curiosidad.`,
+    glossary:{
+      "debated":"debatido", "trait":"rasgo", "cultivated":"cultivado",
+      "deliberate":"deliberado", "instinct":"instinto", "tolerate":"tolerar",
+      "uncertainty":"incertidumbre", "unfamiliar":"desconocido",
+      "resilient":"resiliente", "failure":"fracaso", "nurture":"fomentar / nutrir",
+      "rewarding":"premiar", "workplaces":"lugares de trabajo",
+      "acquiring":"adquiriendo", "willingness":"disposición",
+      "patience":"paciencia"
+    },
+    questions:[
+      {
+        q:"According to the text, how do curious people typically respond to unfamiliar situations?",
+        options:["They avoid them completely","They see them as threats","They treat them like puzzles to solve","They ask someone else to handle them"],
+        correct:2,
+        explanation:"El texto dice: 'approaching unfamiliar situations as puzzles rather than threats'."
+      },
+      {
+        q:"What do educators do to help nurture curiosity in students, according to the passage?",
+        options:["They only grade correct answers","They reward good questions as well as correct answers","They discourage questions during class","They focus solely on memorization"],
+        correct:1,
+        explanation:"El texto indica: 'rewarding good questions as much as correct answers'."
+      }
+    ]
+  },
+
+  {
+    id:"b3", level:"B",
+    title:"The Rise of Remote Work",
+    subtitle:"Un análisis sobre cómo el trabajo remoto transformó las expectativas laborales.",
+    text:`When the shift toward remote work accelerated in recent years, many analysts predicted it would remain a temporary adjustment rather than a lasting transformation. That prediction has largely proven wrong. Surveys conducted across multiple industries reveal that a significant portion of employees now expect some degree of flexibility as a standard condition of employment, not a special privilege. Companies that initially resisted the change have gradually adapted, redesigning offices into collaborative hubs used only a few days a week rather than daily workstations. Proponents argue that remote work reduces commuting time, lowers stress, and allows employees to better balance personal responsibilities with professional demands. Critics, however, point to less visible costs: weakened informal mentorship, diminished spontaneous collaboration, and a blurred boundary between work and rest that can lead to longer, less structured working hours. Some researchers have also raised concerns about equity, noting that employees with quieter homes and reliable internet access benefit more from remote arrangements than those without such resources. As organizations continue experimenting with hybrid models, the central challenge appears less about whether remote work is effective, and more about which specific practices genuinely serve both productivity and wellbeing, rather than simply following whichever trend currently dominates public conversation.`,
+    translation:`Cuando el cambio hacia el trabajo remoto se aceleró en años recientes, muchos analistas predijeron que sería un ajuste temporal y no una transformación duradera. Esa predicción ha resultado, en gran medida, equivocada. Encuestas realizadas en múltiples industrias revelan que una parte significativa de los empleados ahora espera cierto grado de flexibilidad como condición estándar del empleo, no como un privilegio especial. Las empresas que inicialmente se resistieron al cambio se han adaptado gradualmente, rediseñando oficinas como centros colaborativos usados solo unos días a la semana en lugar de puestos de trabajo diarios. Los defensores argumentan que el trabajo remoto reduce el tiempo de traslado, disminuye el estrés y permite a los empleados equilibrar mejor las responsabilidades personales con las exigencias profesionales. Los críticos, sin embargo, señalan costos menos visibles: mentoría informal debilitada, colaboración espontánea disminuida, y un límite difuso entre el trabajo y el descanso que puede llevar a jornadas más largas y menos estructuradas. Algunos investigadores también han expresado preocupación por la equidad, notando que los empleados con hogares más tranquilos y acceso confiable a internet se benefician más de los arreglos remotos que quienes carecen de esos recursos. Mientras las organizaciones siguen experimentando con modelos híbridos, el desafío central parece ser menos si el trabajo remoto es efectivo, y más cuáles prácticas específicas realmente sirven tanto a la productividad como al bienestar, en lugar de simplemente seguir la tendencia que domina la conversación pública en cada momento.`,
+    glossary:{
+      "accelerated":"aceleró", "temporary":"temporal", "transformation":"transformación",
+      "flexibility":"flexibilidad", "privilege":"privilegio", "resisted":"se resistió",
+      "commuting":"traslado al trabajo", "spontaneous":"espontáneo(a)",
+      "blurred":"difuso(a)", "equity":"equidad", "arrangements":"arreglos",
+      "hybrid":"híbrido(a)", "wellbeing":"bienestar", "dominates":"domina"
+    },
+    questions:[
+      { q:"According to the passage, what concern have some researchers raised about remote work and equity?",
+        options:["Remote work is too expensive for companies","Employees with quieter homes and reliable internet benefit more than others","Remote workers earn less money","Remote work only works for large companies"],
+        correct:1, explanation:"El texto dice: 'employees with quieter homes and reliable internet access benefit more from remote arrangements than those without such resources'." },
+      { q:"What do critics of remote work point to as a hidden cost, according to the text?",
+        options:["Higher office rent","Weakened informal mentorship and blurred work-rest boundaries","Increased commuting time","Lower employee satisfaction"],
+        correct:1, explanation:"El texto indica: 'weakened informal mentorship, diminished spontaneous collaboration, and a blurred boundary between work and rest'." }
+    ]
+  },
+
+  {
+    id:"b4", level:"B",
+    title:"Why We Procrastinate",
+    subtitle:"Un ensayo sobre la procrastinación como respuesta emocional, no como falta de organización.",
+    text:`Procrastination is often misunderstood as a simple failure of time management, something that could be solved with a better calendar or a stricter schedule. Psychological research suggests a more complicated picture. Rather than a scheduling problem, procrastination frequently functions as an emotional regulation strategy: people delay tasks not because they misjudge how long something will take, but because the task itself triggers uncomfortable feelings such as anxiety, boredom, or self-doubt. Avoiding the task offers immediate relief from that discomfort, even though it usually creates greater stress later. This explains why procrastination tends to increase around tasks tied to fear of failure or fear of judgment, such as writing an important email or starting a project that will be evaluated by others. Interestingly, studies show that self-compassion, rather than harsh self-criticism, is more effective at reducing procrastination over time. Students who forgive themselves for procrastinating on a previous assignment are less likely to procrastinate on the next one, whereas students who criticize themselves harshly often become caught in a repeating cycle of avoidance and guilt. Understanding procrastination as an emotional response, rather than a character flaw, opens the door to more practical solutions, such as breaking a task into smaller steps or simply starting for just five minutes to reduce its emotional weight.`,
+    translation:`La procrastinación a menudo se malinterpreta como un simple fallo en la gestión del tiempo, algo que podría resolverse con un mejor calendario o un horario más estricto. La investigación psicológica sugiere un panorama más complicado. En lugar de ser un problema de programación, la procrastinación frecuentemente funciona como una estrategia de regulación emocional: las personas retrasan las tareas no porque calculen mal cuánto tiempo tomará algo, sino porque la tarea misma provoca sentimientos incómodos como ansiedad, aburrimiento o inseguridad. Evitar la tarea ofrece un alivio inmediato de esa incomodidad, aunque generalmente crea más estrés más adelante. Esto explica por qué la procrastinación tiende a aumentar en tareas asociadas al miedo al fracaso o al miedo al juicio ajeno, como escribir un correo importante o comenzar un proyecto que será evaluado por otros. Curiosamente, los estudios muestran que la autocompasión, en lugar de la autocrítica dura, es más eficaz para reducir la procrastinación con el tiempo. Los estudiantes que se perdonan a sí mismos por haber procrastinado una tarea anterior tienen menos probabilidad de procrastinar la siguiente, mientras que los estudiantes que se critican duramente a menudo quedan atrapados en un ciclo repetitivo de evitación y culpa. Entender la procrastinación como una respuesta emocional, en lugar de un defecto de carácter, abre la puerta a soluciones más prácticas, como dividir una tarea en pasos más pequeños o simplemente comenzar por solo cinco minutos para reducir su peso emocional.`,
+    glossary:{
+      "procrastination":"procrastinación", "misunderstood":"malinterpretado(a)",
+      "regulation":"regulación", "triggers":"provoca", "discomfort":"incomodidad",
+      "relief":"alivio", "judgment":"juicio", "self-compassion":"autocompasión",
+      "harsh":"duro(a) / severo(a)", "criticism":"crítica", "cycle":"ciclo",
+      "avoidance":"evitación", "guilt":"culpa"
+    },
+    questions:[
+      { q:"According to the passage, why do people typically delay tasks?",
+        options:["Because they misjudge how long the task will take","Because the task triggers uncomfortable feelings like anxiety or self-doubt","Because they lack a calendar","Because they are lazy by nature"],
+        correct:1, explanation:"El texto dice: 'the task itself triggers uncomfortable feelings such as anxiety, boredom, or self-doubt'." },
+      { q:"What does the passage say is more effective at reducing procrastination over time?",
+        options:["Harsh self-criticism","Self-compassion","Strict deadlines","Working longer hours"],
+        correct:1, explanation:"El texto indica: 'self-compassion, rather than harsh self-criticism, is more effective at reducing procrastination over time'." }
+    ]
+  },
+
+  {
+    id:"b5", level:"B",
+    title:"The Hidden Cost of Fast Fashion",
+    subtitle:"Un vistazo a las consecuencias ambientales y laborales de la moda rápida.",
+    text:`The clothing industry has transformed dramatically over the past two decades, driven by a business model commonly known as fast fashion, in which new clothing designs move from concept to store shelves in a matter of weeks rather than months. For consumers, this shift has meant lower prices and a constant stream of new styles. For the environment and for garment workers, however, the consequences have been considerably less favorable. Producing a single cotton t-shirt can require thousands of liters of water, and the rapid pace of fast fashion encourages consumers to treat clothing as disposable, discarding garments after only a few wears. Textile waste now accumulates in landfills at an alarming rate, and synthetic fabrics such as polyester can take centuries to decompose, gradually releasing microplastics into waterways in the meantime. Labor conditions raise equally serious concerns. Many garment factories, concentrated in countries with weaker labor protections, operate under intense pressure to meet extremely tight production deadlines, sometimes resulting in unsafe working conditions and wages that fall below what is needed for a basic standard of living. In response, a growing number of consumers have begun favoring secondhand clothing, clothing rental services, and brands that disclose their supply chains transparently. Whether these alternatives can meaningfully reshape an industry built on speed and low cost, though, remains an open question.`,
+    translation:`La industria de la ropa se ha transformado dramáticamente en las últimas dos décadas, impulsada por un modelo de negocio conocido comúnmente como moda rápida, en el cual nuevos diseños de ropa pasan del concepto a los estantes de las tiendas en cuestión de semanas y no de meses. Para los consumidores, este cambio ha significado precios más bajos y un flujo constante de nuevos estilos. Para el medio ambiente y para los trabajadores de la confección, sin embargo, las consecuencias han sido considerablemente menos favorables. Producir una sola camiseta de algodón puede requerir miles de litros de agua, y el ritmo acelerado de la moda rápida anima a los consumidores a tratar la ropa como desechable, descartando prendas después de solo unos pocos usos. Los desechos textiles ahora se acumulan en los vertederos a un ritmo alarmante, y las telas sintéticas como el poliéster pueden tardar siglos en descomponerse, liberando gradualmente microplásticos en las vías fluviales mientras tanto. Las condiciones laborales generan preocupaciones igualmente serias. Muchas fábricas de confección, concentradas en países con protecciones laborales más débiles, operan bajo una presión intensa para cumplir plazos de producción extremadamente ajustados, lo cual a veces resulta en condiciones de trabajo inseguras y salarios que quedan por debajo de lo necesario para un nivel de vida básico. En respuesta, un número creciente de consumidores ha comenzado a preferir la ropa de segunda mano, los servicios de alquiler de ropa y las marcas que revelan sus cadenas de suministro de manera transparente. Si estas alternativas pueden transformar de manera significativa una industria construida sobre la velocidad y el bajo costo, sin embargo, sigue siendo una pregunta abierta.`,
+    glossary:{
+      "fast fashion":"moda rápida", "disposable":"desechable", "discarding":"descartando",
+      "textile":"textil", "landfills":"vertederos", "decompose":"descomponerse",
+      "microplastics":"microplásticos", "labor":"laboral / mano de obra",
+      "deadlines":"plazos", "wages":"salarios", "secondhand":"de segunda mano",
+      "transparently":"de manera transparente", "supply chains":"cadenas de suministro"
+    },
+    questions:[
+      { q:"According to the text, what happens to synthetic fabrics like polyester over time?",
+        options:["They decompose quickly","They can take centuries to decompose and release microplastics","They dissolve safely in water","They are always recycled immediately"],
+        correct:1, explanation:"El texto dice: 'synthetic fabrics such as polyester can take centuries to decompose, gradually releasing microplastics'." },
+      { q:"What concern does the passage raise about garment factory labor conditions?",
+        options:["Factories are too automated","Workers are paid too much","Intense production pressure can lead to unsafe conditions and low wages","Factories only operate in wealthy countries"],
+        correct:2, explanation:"El texto indica: 'operate under intense pressure... sometimes resulting in unsafe working conditions and wages that fall below what is needed'." }
+    ]
+  },
+
+  {
+    id:"b6", level:"B",
+    title:"The Science of Sleep",
+    subtitle:"Por qué el cerebro dormido está mucho más activo de lo que pensamos.",
+    text:`For much of the twentieth century, sleep was widely regarded as a passive state, little more than the brain and body pausing operations until morning. Modern sleep science has thoroughly overturned that assumption. Rather than shutting down, the sleeping brain remains remarkably active, cycling through distinct stages that each serve different biological functions. During deep sleep, the body repairs tissue, strengthens the immune system, and consolidates certain types of memory, particularly information related to facts and events. During REM sleep, characterized by rapid eye movement and vivid dreaming, the brain appears to process emotional experiences and strengthen creative problem-solving abilities. Disrupting either stage, even without reducing total sleep time, can measurably impair mood, concentration, and decision-making the following day. Chronic sleep deprivation, researchers have found, carries risks that extend well beyond daytime tiredness, including a heightened likelihood of cardiovascular disease, weakened immune function, and difficulties regulating appetite. Despite this growing body of evidence, many people continue to treat sleep as a flexible resource that can be sacrificed to accommodate work, study, or entertainment. Public health experts increasingly argue that this attitude needs to shift, framing adequate sleep not as a luxury but as a biological necessity comparable to proper nutrition, one that supports nearly every system in the human body.`,
+    translation:`Durante gran parte del siglo veinte, el sueño se consideraba ampliamente un estado pasivo, poco más que el cerebro y el cuerpo pausando sus operaciones hasta la mañana. La ciencia moderna del sueño ha desmentido por completo esa suposición. En lugar de apagarse, el cerebro dormido permanece notablemente activo, pasando por etapas distintas que cumplen diferentes funciones biológicas. Durante el sueño profundo, el cuerpo repara tejidos, fortalece el sistema inmunológico y consolida ciertos tipos de memoria, particularmente información relacionada con hechos y eventos. Durante el sueño REM, caracterizado por el movimiento rápido de los ojos y sueños vívidos, el cerebro parece procesar experiencias emocionales y fortalecer las habilidades creativas de resolución de problemas. Interrumpir cualquiera de las dos etapas, incluso sin reducir el tiempo total de sueño, puede afectar de manera medible el estado de ánimo, la concentración y la toma de decisiones al día siguiente. La privación crónica de sueño, según han encontrado los investigadores, conlleva riesgos que van mucho más allá del cansancio diurno, incluyendo una mayor probabilidad de enfermedad cardiovascular, un sistema inmunológico debilitado y dificultades para regular el apetito. A pesar de esta creciente evidencia, muchas personas siguen tratando el sueño como un recurso flexible que puede sacrificarse para dar espacio al trabajo, el estudio o el entretenimiento. Los expertos en salud pública argumentan cada vez más que esta actitud necesita cambiar, presentando el sueño adecuado no como un lujo, sino como una necesidad biológica comparable a una buena nutrición, que sostiene casi todos los sistemas del cuerpo humano.`,
+    glossary:{
+      "passive":"pasivo(a)", "overturned":"desmintió / revirtió", "cycling":"pasando por etapas",
+      "deep sleep":"sueño profundo", "consolidates":"consolida", "REM":"sueño REM",
+      "vivid":"vívido(a)", "disrupting":"interrumpir", "impair":"afectar negativamente",
+      "deprivation":"privación", "cardiovascular":"cardiovascular", "appetite":"apetito",
+      "luxury":"lujo", "necessity":"necesidad"
+    },
+    questions:[
+      { q:"According to the text, what happens during deep sleep?",
+        options:["The brain shuts down completely","The body repairs tissue and consolidates certain memories","Dreams become most vivid","Blood pressure rises sharply"],
+        correct:1, explanation:"El texto dice: 'During deep sleep, the body repairs tissue, strengthens the immune system, and consolidates certain types of memory'." },
+      { q:"What risks does chronic sleep deprivation carry, according to the passage?",
+        options:["Only daytime tiredness","Heightened risk of cardiovascular disease and weakened immune function, among others","Improved memory consolidation","No measurable risks"],
+        correct:1, explanation:"El texto indica: 'risks that extend well beyond daytime tiredness, including a heightened likelihood of cardiovascular disease, weakened immune function'." }
+    ]
+  },
+
+  {
+    id:"b7", level:"B",
+    title:"The Art of Small Talk",
+    subtitle:"Por qué las charlas triviales cumplen una función social importante.",
+    text:`Small talk is frequently dismissed as shallow or even a waste of time, a ritual exchange about weather or weekend plans that seems to accomplish little. Sociologists who study everyday communication, however, argue that small talk performs an essential and often underestimated function: it establishes trust and signals social safety before any deeper conversation can take place. Rather than being meaningless, brief exchanges about ordinary topics allow people to gauge tone, warmth, and openness in another person, information that later shapes whether a more substantial conversation feels comfortable or risky. Research on workplace dynamics has found that teams which engage in even a few minutes of informal, non-work-related conversation before meetings tend to collaborate more effectively and report higher levels of trust than teams that move directly into business matters. Cultural expectations around small talk vary considerably, though generalizations should be made cautiously, since norms differ not only between countries but within them, shaped by context, profession, and individual personality. What unites most cultures is the underlying function itself: small talk operates as a kind of social handshake, low-stakes enough to lower defenses, yet purposeful enough to prepare the ground for genuine connection. Viewed this way, the seemingly trivial comment about the weather turns out to be doing quiet, important social work.`,
+    translation:`El small talk, o charla informal, con frecuencia se descarta como algo superficial o incluso una pérdida de tiempo, un intercambio ritual sobre el clima o los planes del fin de semana que parece lograr muy poco. Sin embargo, los sociólogos que estudian la comunicación cotidiana argumentan que la charla informal cumple una función esencial y a menudo subestimada: establece confianza y señala seguridad social antes de que pueda darse una conversación más profunda. Lejos de ser irrelevantes, los breves intercambios sobre temas ordinarios permiten a las personas evaluar el tono, la calidez y la apertura de otra persona, información que después determina si una conversación más sustancial se sentirá cómoda o arriesgada. Investigaciones sobre dinámicas laborales han encontrado que los equipos que dedican incluso unos minutos a una conversación informal, no relacionada con el trabajo, antes de las reuniones tienden a colaborar más eficazmente y reportan mayores niveles de confianza que los equipos que pasan directamente a los asuntos de negocios. Las expectativas culturales sobre la charla informal varían considerablemente, aunque las generalizaciones deben hacerse con cautela, ya que las normas difieren no solo entre países sino dentro de ellos, moldeadas por el contexto, la profesión y la personalidad individual. Lo que une a la mayoría de las culturas es la función subyacente misma: la charla informal funciona como una especie de apretón de manos social, lo suficientemente inofensivo como para bajar las defensas, pero lo suficientemente intencional como para preparar el terreno para una conexión genuina. Vista de esta manera, el comentario aparentemente trivial sobre el clima resulta estar realizando un trabajo social silencioso e importante.`,
+    glossary:{
+      "dismissed":"descartado(a)", "shallow":"superficial", "ritual":"ritual",
+      "underestimated":"subestimado(a)", "gauge":"evaluar / medir", "warmth":"calidez",
+      "substantial":"sustancial", "dynamics":"dinámicas", "informal":"informal",
+      "norms":"normas", "trivial":"trivial", "handshake":"apretón de manos",
+      "defenses":"defensas"
+    },
+    questions:[
+      { q:"According to sociologists mentioned in the text, what essential function does small talk serve?",
+        options:["It wastes time before real conversation","It establishes trust and signals social safety","It is used only in professional settings","It has no real purpose"],
+        correct:1, explanation:"El texto dice: 'small talk performs an essential and often underestimated function: it establishes trust and signals social safety'." },
+      { q:"What did research on workplace dynamics find about teams that engage in informal conversation before meetings?",
+        options:["They collaborate less effectively","They tend to collaborate more effectively and report higher trust","They finish meetings faster","They avoid discussing business matters entirely"],
+        correct:1, explanation:"El texto indica: 'teams... tend to collaborate more effectively and report higher levels of trust'." }
+    ]
+  },
+
+  {
+    id:"b8", level:"B",
+    title:"Food Deserts and Public Health",
+    subtitle:"Cómo el acceso desigual a alimentos frescos afecta la salud de comunidades enteras.",
+    text:`In many cities, access to fresh, affordable food depends heavily on where a person happens to live, a reality captured by the term food desert, used to describe neighborhoods where residents have limited access to supermarkets offering fruits, vegetables, and other nutritious options. Instead, these areas are often served primarily by convenience stores and fast food outlets, where inexpensive, calorie-dense, processed food is far easier to find than fresh produce. The consequences extend well beyond simple inconvenience. Public health researchers have linked food deserts to higher rates of obesity, diabetes, and related chronic illnesses, particularly among lower-income households that may lack reliable transportation to travel farther for groceries. Addressing the problem has proven more complicated than simply opening new supermarkets, since grocery stores require reliable customer volume to remain financially viable, and some companies have been reluctant to invest in areas with lower average incomes. Community-led responses have emerged in various forms, including urban farming initiatives, mobile markets that bring fresh produce directly to underserved neighborhoods, and cooperative grocery models owned collectively by local residents rather than outside investors. While no single solution has proven universally effective, most researchers agree that lasting change requires coordinated investment from local government, private business, and community organizations working together, rather than treating food access as a problem that will resolve itself through market forces alone.`,
+    translation:`En muchas ciudades, el acceso a alimentos frescos y asequibles depende en gran medida de dónde vive una persona, una realidad captada por el término desierto alimentario, usado para describir vecindarios donde los residentes tienen acceso limitado a supermercados que ofrecen frutas, verduras y otras opciones nutritivas. En cambio, estas áreas suelen estar atendidas principalmente por tiendas de conveniencia y locales de comida rápida, donde los alimentos procesados, económicos y con alta densidad calórica son mucho más fáciles de encontrar que los productos frescos. Las consecuencias van mucho más allá de una simple incomodidad. Los investigadores de salud pública han vinculado los desiertos alimentarios con tasas más altas de obesidad, diabetes y enfermedades crónicas relacionadas, particularmente entre hogares de bajos ingresos que pueden carecer de transporte confiable para viajar más lejos en busca de víveres. Abordar el problema ha resultado más complicado que simplemente abrir nuevos supermercados, ya que las tiendas de comestibles necesitan un volumen confiable de clientes para seguir siendo viables financieramente, y algunas empresas se han mostrado reacias a invertir en áreas con ingresos promedio más bajos. Han surgido respuestas lideradas por la comunidad en diversas formas, incluyendo iniciativas de agricultura urbana, mercados móviles que llevan productos frescos directamente a vecindarios desatendidos, y modelos de tiendas cooperativas propiedad colectiva de los residentes locales en lugar de inversores externos. Aunque ninguna solución individual ha demostrado ser universalmente efectiva, la mayoría de los investigadores coinciden en que un cambio duradero requiere una inversión coordinada entre el gobierno local, la empresa privada y las organizaciones comunitarias trabajando juntas, en lugar de tratar el acceso a los alimentos como un problema que se resolverá por sí solo mediante las fuerzas del mercado.`,
+    glossary:{
+      "food desert":"desierto alimentario", "affordable":"asequible", "nutritious":"nutritivo(a)",
+      "convenience stores":"tiendas de conveniencia", "processed":"procesado(a)",
+      "obesity":"obesidad", "diabetes":"diabetes", "chronic":"crónico(a)",
+      "viable":"viable", "reluctant":"reacio(a)", "cooperative":"cooperativo(a)",
+      "underserved":"desatendido(a)", "coordinated":"coordinado(a)"
+    },
+    questions:[
+      { q:"According to the passage, what have public health researchers linked food deserts to?",
+        options:["Lower housing costs","Higher rates of obesity, diabetes, and related chronic illnesses","Improved access to transportation","Increased supermarket competition"],
+        correct:1, explanation:"El texto dice: 'Public health researchers have linked food deserts to higher rates of obesity, diabetes, and related chronic illnesses'." },
+      { q:"Why have some companies been reluctant to open supermarkets in food desert areas?",
+        options:["Because of strict government regulations","Because grocery stores need reliable customer volume to be financially viable","Because there is too much competition already","Because those areas lack roads"],
+        correct:1, explanation:"El texto indica: 'grocery stores require reliable customer volume to remain financially viable, and some companies have been reluctant to invest'." }
+    ]
+  },
+
+  {
+    id:"b9", level:"B",
+    title:"The Economics of Traffic Jams",
+    subtitle:"Por qué ampliar carreteras rara vez resuelve la congestión vehicular.",
+    text:`Anyone who has sat motionless in traffic has likely wondered why a road built to move thousands of cars can grind to a near standstill without any visible cause, such as an accident or construction. Transportation economists have a well-documented explanation, one that often surprises people: adding more lanes to a congested highway frequently fails to solve congestion in the long run, and can even make it worse. This counterintuitive outcome, known as induced demand, occurs because expanding road capacity initially reduces travel time, which in turn encourages more people to drive, take longer routes, or shift from public transit to private cars, since the road now appears less congested. Within a few years, traffic volume typically rises to fill the newly available space, returning congestion to previous levels or beyond. This dynamic has led some cities to experiment with alternative approaches, including congestion pricing, in which drivers pay a fee to enter heavily trafficked areas during peak hours, and investment in public transit designed to offer a genuinely competitive alternative to driving. Critics of congestion pricing argue that it disproportionately affects lower-income drivers who cannot easily shift their commuting schedules. Supporters counter that revenue generated can be reinvested into public transportation, potentially benefiting the very commuters most burdened by unreliable roads. The debate ultimately reflects a broader tension in urban policy: whether to accommodate ever-growing demand for driving, or to actively reshape that demand through pricing and alternatives.`,
+    translation:`Cualquiera que se haya quedado inmóvil en el tráfico probablemente se ha preguntado por qué una carretera construida para mover miles de autos puede llegar a un punto casi de detención total sin ninguna causa visible, como un accidente o una construcción. Los economistas del transporte tienen una explicación bien documentada, que a menudo sorprende a la gente: agregar más carriles a una autopista congestionada frecuentemente no resuelve la congestión a largo plazo, e incluso puede empeorarla. Este resultado contraintuitivo, conocido como demanda inducida, ocurre porque expandir la capacidad de la carretera inicialmente reduce el tiempo de viaje, lo cual a su vez anima a más personas a conducir, tomar rutas más largas, o cambiar del transporte público a los autos privados, ya que la carretera ahora parece menos congestionada. En pocos años, el volumen de tráfico típicamente aumenta hasta llenar el nuevo espacio disponible, devolviendo la congestión a niveles previos o incluso peores. Esta dinámica ha llevado a algunas ciudades a experimentar con enfoques alternativos, incluyendo el cobro por congestión, en el cual los conductores pagan una tarifa para entrar en áreas muy transitadas durante horas pico, y la inversión en transporte público diseñado para ofrecer una alternativa genuinamente competitiva a conducir. Los críticos del cobro por congestión argumentan que afecta desproporcionadamente a los conductores de bajos ingresos que no pueden cambiar fácilmente sus horarios de traslado. Los partidarios responden que los ingresos generados pueden reinvertirse en el transporte público, beneficiando potencialmente a los mismos viajeros más afectados por carreteras poco confiables. El debate finalmente refleja una tensión más amplia en la política urbana: si acomodar la demanda siempre creciente de conducir, o moldear activamente esa demanda mediante precios y alternativas.`,
+    glossary:{
+      "motionless":"inmóvil", "standstill":"detención total", "congested":"congestionado(a)",
+      "induced demand":"demanda inducida", "counterintuitive":"contraintuitivo(a)",
+      "capacity":"capacidad", "transit":"transporte público", "peak hours":"horas pico",
+      "disproportionately":"desproporcionadamente", "commuting":"traslado al trabajo",
+      "revenue":"ingresos", "reinvested":"reinvertido(a)", "burdened":"afectado(a) / cargado(a)"
+    },
+    questions:[
+      { q:"What is \"induced demand,\" according to the passage?",
+        options:["A law that limits the number of cars on the road","The phenomenon where expanding road capacity leads to more driving and eventually more congestion","A tax on new highways","A type of traffic light system"],
+        correct:1, explanation:"El texto dice: 'This counterintuitive outcome, known as induced demand, occurs because expanding road capacity initially reduces travel time, which in turn encourages more people to drive'." },
+      { q:"What do supporters of congestion pricing argue, according to the text?",
+        options:["It has no effect on traffic","Revenue from it can be reinvested into public transportation","It should be eliminated entirely","It only benefits wealthy drivers"],
+        correct:1, explanation:"El texto indica: 'Supporters counter that revenue generated can be reinvested into public transportation'." }
+    ]
+  },
+
+  {
+    id:"b10", level:"B",
+    title:"Why Languages Die",
+    subtitle:"Cómo las presiones económicas y sociales hacen desaparecer lenguas enteras.",
+    text:`Of the roughly seven thousand languages spoken in the world today, linguists estimate that a significant portion could disappear within this century, many of them well before they have ever been thoroughly documented. Language loss rarely results from a single dramatic event; more often, it unfolds gradually across generations, as economic pressure, migration, and shifting social prestige combine to make a dominant language more practical for daily life, education, and employment. Parents, hoping to give their children better opportunities, may choose to speak that dominant language at home, even when they themselves grew up speaking a minority language fluently. Over two or three generations, children grow up understanding but not speaking the ancestral language, and eventually that understanding fades as well. Linguists argue that language loss carries consequences that extend beyond communication itself. Each language encodes a distinct way of organizing knowledge about the natural world, kinship, time, and causation, accumulated over centuries of lived experience within a particular environment. When a language disappears, that accumulated knowledge, including traditional ecological understanding, oral histories, and unique grammatical structures found nowhere else, disappears alongside it. Revitalization efforts, ranging from community language schools to digital archiving projects, have shown some success in slowing this process, though linguists generally agree that sustained revitalization requires far more than academic documentation: it requires communities themselves choosing, generation after generation, to keep a language alive as a living, spoken practice rather than a preserved artifact.`,
+    translation:`De las aproximadamente siete mil lenguas que se hablan hoy en el mundo, los lingüistas estiman que una parte significativa podría desaparecer dentro de este siglo, muchas de ellas mucho antes de haber sido documentadas a fondo. La pérdida de una lengua rara vez resulta de un solo evento dramático; con más frecuencia, ocurre gradualmente a lo largo de generaciones, a medida que la presión económica, la migración y el prestigio social cambiante se combinan para hacer que una lengua dominante sea más práctica para la vida diaria, la educación y el empleo. Los padres, con la esperanza de dar a sus hijos mejores oportunidades, pueden elegir hablar esa lengua dominante en casa, incluso cuando ellos mismos crecieron hablando con fluidez una lengua minoritaria. En el transcurso de dos o tres generaciones, los niños crecen entendiendo pero no hablando la lengua ancestral, y eventualmente esa comprensión también se desvanece. Los lingüistas argumentan que la pérdida de una lengua conlleva consecuencias que van más allá de la comunicación misma. Cada lengua codifica una manera distinta de organizar el conocimiento sobre el mundo natural, el parentesco, el tiempo y la causalidad, acumulado a lo largo de siglos de experiencia vivida dentro de un entorno particular. Cuando una lengua desaparece, ese conocimiento acumulado, incluyendo la comprensión ecológica tradicional, las historias orales y estructuras gramaticales únicas que no se encuentran en ninguna otra parte, desaparece junto con ella. Los esfuerzos de revitalización, que van desde escuelas comunitarias de lengua hasta proyectos de archivo digital, han mostrado cierto éxito en frenar este proceso, aunque los lingüistas generalmente coinciden en que una revitalización sostenida requiere mucho más que documentación académica: requiere que las propias comunidades elijan, generación tras generación, mantener una lengua viva como una práctica hablada y viva, en lugar de un artefacto conservado.`,
+    glossary:{
+      "linguists":"lingüistas", "dominant":"dominante", "prestige":"prestigio",
+      "ancestral":"ancestral", "encodes":"codifica", "kinship":"parentesco",
+      "causation":"causalidad", "accumulated":"acumulado(a)", "revitalization":"revitalización",
+      "archiving":"archivo", "sustained":"sostenido(a)", "artifact":"artefacto"
+    },
+    questions:[
+      { q:"According to the passage, how does language loss typically occur?",
+        options:["Through a single dramatic event","Gradually across generations due to economic pressure, migration, and shifting prestige","Only through government policy","Suddenly within one generation"],
+        correct:1, explanation:"El texto dice: 'it unfolds gradually across generations, as economic pressure, migration, and shifting social prestige combine'." },
+      { q:"What do linguists say is required for sustained language revitalization?",
+        options:["Only academic documentation","Communities choosing to keep the language alive as a spoken practice","Government funding alone","Translating the language into English"],
+        correct:1, explanation:"El texto indica: 'it requires communities themselves choosing... to keep a language alive as a living, spoken practice'." }
+    ]
+  },
+
+  {
+    id:"b11", level:"B",
+    title:"The Psychology of Color in Marketing",
+    subtitle:"Por qué la consistencia importa más que el significado de un solo color.",
+    text:`Marketing professionals have long assumed that color choice influences consumer behavior, and a substantial body of research supports the general idea, even though the specific mechanisms are more nuanced than popular claims often suggest. Contrary to widely circulated infographics claiming that red increases appetite or blue signals trustworthiness for every person in every context, researchers emphasize that color perception is heavily shaped by cultural background, personal experience, and situational context, making universal rules unreliable. What research does support more consistently is that color contributes to a brand's overall impression through consistency rather than any single color's inherent meaning. Brands that use color reliably across packaging, advertising, and digital platforms tend to be recognized more quickly and remembered more accurately than brands that vary their palette unpredictably. Color also interacts with expectation: a technology company using a palette typically associated with organic food products may create subtle cognitive friction, since consumers unconsciously compare new stimuli against category norms built from years of exposure to similar products. This explains why disruptive brands sometimes deliberately violate color expectations to stand out, accepting short-term unfamiliarity in exchange for long-term memorability. Ultimately, the effective use of color in marketing depends less on universal psychological triggers and more on strategic consistency, category awareness, and a clear understanding of the specific audience a brand intends to reach.`,
+    translation:`Los profesionales del marketing han asumido durante mucho tiempo que la elección del color influye en el comportamiento del consumidor, y un cuerpo sustancial de investigación respalda la idea general, aunque los mecanismos específicos son más matizados de lo que sugieren a menudo las afirmaciones populares. Contrario a las infografías ampliamente difundidas que afirman que el rojo aumenta el apetito o que el azul señala confiabilidad para toda persona en todo contexto, los investigadores enfatizan que la percepción del color está fuertemente moldeada por el trasfondo cultural, la experiencia personal y el contexto situacional, lo cual hace poco confiables las reglas universales. Lo que la investigación sí respalda de manera más consistente es que el color contribuye a la impresión general de una marca a través de la consistencia, más que por el significado inherente de un solo color. Las marcas que usan el color de manera constante en su empaque, publicidad y plataformas digitales tienden a ser reconocidas más rápidamente y recordadas con mayor precisión que las marcas que varían su paleta de forma impredecible. El color también interactúa con la expectativa: una empresa de tecnología que use una paleta típicamente asociada con productos alimenticios orgánicos puede crear una sutil fricción cognitiva, ya que los consumidores comparan inconscientemente los nuevos estímulos con las normas de la categoría construidas a partir de años de exposición a productos similares. Esto explica por qué algunas marcas disruptivas violan deliberadamente las expectativas de color para destacar, aceptando cierta falta de familiaridad a corto plazo a cambio de mayor memorabilidad a largo plazo. En última instancia, el uso efectivo del color en el marketing depende menos de disparadores psicológicos universales y más de la consistencia estratégica, la conciencia de categoría y una comprensión clara de la audiencia específica a la que una marca pretende llegar.`,
+    glossary:{
+      "nuanced":"matizado(a)", "infographics":"infografías", "trustworthiness":"confiabilidad",
+      "perception":"percepción", "palette":"paleta", "unpredictably":"de forma impredecible",
+      "friction":"fricción", "stimuli":"estímulos", "disruptive":"disruptivo(a)",
+      "deliberately":"deliberadamente", "memorability":"memorabilidad", "strategic":"estratégico(a)"
+    },
+    questions:[
+      { q:"According to the passage, what does research support more consistently about color in branding?",
+        options:["Every color has one universal meaning for all people","Consistency in color use contributes more to brand recognition than any single color's inherent meaning","Red always increases appetite","Blue always signals trustworthiness"],
+        correct:1, explanation:"El texto dice: 'color contributes to a brand's overall impression through consistency rather than any single color's inherent meaning'." },
+      { q:"Why might a disruptive brand deliberately violate color expectations for its category?",
+        options:["To reduce production costs","To stand out, accepting short-term unfamiliarity for long-term memorability","Because color has no effect on branding","To copy a competitor's palette"],
+        correct:1, explanation:"El texto indica: 'disruptive brands sometimes deliberately violate color expectations to stand out, accepting short-term unfamiliarity in exchange for long-term memorability'." }
+    ]
+  },
+
+  {
+    id:"b12", level:"B",
+    title:"How Social Media Shapes Memory",
+    subtitle:"El efecto de fotografiar cada momento sobre cómo lo recordamos después.",
+    text:`Long before smartphones, people relied primarily on their own recollection, supplemented occasionally by photographs or written journals, to preserve memories of significant events. Today, many experiences are documented almost instantly through photos, videos, and posts shared on social media, a shift that researchers argue is subtly reshaping how memory itself functions. One consistent finding is that the act of photographing an experience, particularly when done frequently or with the primary goal of sharing it later, can reduce how vividly a person remembers the moment firsthand, a phenomenon sometimes called the photo-taking impairment effect. Attention devoted to capturing the perfect image appears to compete with attention devoted to actually experiencing the event, leaving a thinner memory trace despite the visual record. At the same time, social media introduces a new complication: constant exposure to curated, filtered versions of other people's experiences can distort a person's sense of what is normal or expected, a dynamic linked in various studies to increased anxiety and lower life satisfaction, particularly among younger users who have grown up with near-constant social comparison. Some researchers also note a more subtle effect on autobiographical memory itself: because social media posts become an externalized, edited record of the past, people may gradually come to rely on that curated version rather than their own internal recollection, effectively outsourcing part of their personal history to a platform designed primarily to maximize engagement rather than to preserve memory accurately.`,
+    translation:`Mucho antes de los teléfonos inteligentes, las personas dependían principalmente de su propio recuerdo, complementado ocasionalmente con fotografías o diarios escritos, para preservar memorias de eventos importantes. Hoy en día, muchas experiencias se documentan casi instantáneamente mediante fotos, videos y publicaciones compartidas en redes sociales, un cambio que los investigadores argumentan está moldeando sutilmente el funcionamiento de la memoria misma. Un hallazgo consistente es que el acto de fotografiar una experiencia, particularmente cuando se hace con frecuencia o con el objetivo principal de compartirla después, puede reducir la viveza con que una persona recuerda el momento de primera mano, un fenómeno a veces llamado el efecto de deterioro por tomar fotos. La atención dedicada a capturar la imagen perfecta parece competir con la atención dedicada a vivir realmente el evento, dejando una huella de memoria más débil a pesar del registro visual. Al mismo tiempo, las redes sociales introducen una nueva complicación: la exposición constante a versiones curadas y filtradas de las experiencias de otras personas puede distorsionar el sentido de lo que es normal o esperado, una dinámica vinculada en varios estudios con mayor ansiedad y menor satisfacción con la vida, particularmente entre usuarios más jóvenes que han crecido con una comparación social casi constante. Algunos investigadores también señalan un efecto más sutil sobre la memoria autobiográfica misma: debido a que las publicaciones en redes sociales se convierten en un registro externalizado y editado del pasado, las personas pueden llegar gradualmente a depender de esa versión curada en lugar de su propio recuerdo interno, externalizando efectivamente parte de su historia personal a una plataforma diseñada principalmente para maximizar la interacción, no para preservar la memoria con precisión.`,
+    glossary:{
+      "recollection":"recuerdo", "documented":"documentado(a)", "vividly":"vívidamente",
+      "impairment":"deterioro", "curated":"curado(a)", "filtered":"filtrado(a)",
+      "distort":"distorsionar", "comparison":"comparación", "autobiographical":"autobiográfico(a)",
+      "externalized":"externalizado(a)", "outsourcing":"externalizando / delegando", "engagement":"interacción"
+    },
+    questions:[
+      { q:"What is the \"photo-taking impairment effect,\" according to the passage?",
+        options:["Photos always improve memory accuracy","Photographing an experience can reduce how vividly a person remembers it firsthand","Taking photos has no effect on memory","Photos replace the need for memory entirely"],
+        correct:1, explanation:"El texto dice: 'the act of photographing an experience... can reduce how vividly a person remembers the moment firsthand'." },
+      { q:"According to the text, what may happen to autobiographical memory as people rely on social media posts?",
+        options:["It becomes more accurate over time","People may come to rely on the curated online version rather than their own internal recollection","It disappears completely","It becomes shared publicly by default"],
+        correct:1, explanation:"El texto indica: 'people may gradually come to rely on that curated version rather than their own internal recollection'." }
+    ]
+  },
+
+  /* ---------------------------- NIVEL C ---------------------------- */
+  {
+    id:"c1", level:"C",
+    title:"The Architecture of Memory",
+    subtitle:"Un texto académico sobre neurociencia y la naturaleza reconstructiva de la memoria.",
+    text:`Memory, contrary to popular belief, does not function like a video recorder that faithfully preserves every detail of an experience for later retrieval. Instead, contemporary neuroscience describes memory as a reconstructive process, one in which the brain assembles a plausible narrative each time an event is recalled, drawing on fragments stored across distributed neural networks. This distinction carries significant consequences, particularly in domains such as eyewitness testimony, where a witness's confident recollection may nonetheless diverge substantially from what actually occurred. Researchers studying the hippocampus, a seahorse-shaped structure nestled deep within the temporal lobe, have demonstrated that this region acts less like a filing cabinet and more like an editor, continuously revising and consolidating memories during both waking hours and sleep. Each act of remembering, in fact, appears to render a memory temporarily unstable, susceptible to subtle alteration before it is filed away again, a phenomenon known as reconsolidation. This helps explain why repeated retelling of a story can gradually distort its details, even when the storyteller has no intention to deceive. Emotional intensity further complicates the picture: highly charged experiences are often recalled with greater vividness and confidence, yet vividness does not guarantee accuracy, and traumatic memories in particular can be marked by striking inconsistencies. Understanding memory as a fundamentally reconstructive faculty, rather than a static archive, has reshaped fields ranging from clinical psychology to legal practice, prompting courts in several countries to treat uncorroborated eyewitness testimony with considerably more caution than they once did. The implications extend beyond the courtroom, inviting a broader reconsideration of how much we should trust the vivid certainty of our own recollections.`,
+    translation:`La memoria, contrariamente a la creencia popular, no funciona como una videograbadora que preserva fielmente cada detalle de una experiencia para su recuperación posterior. En cambio, la neurociencia contemporánea describe la memoria como un proceso reconstructivo, en el cual el cerebro arma una narrativa plausible cada vez que se recuerda un evento, basándose en fragmentos almacenados en redes neuronales distribuidas. Esta distinción tiene consecuencias importantes, particularmente en ámbitos como el testimonio de testigos oculares, donde el recuerdo seguro de un testigo puede, sin embargo, diferir sustancialmente de lo que realmente ocurrió. Los investigadores que estudian el hipocampo, una estructura con forma de caballito de mar ubicada en lo profundo del lóbulo temporal, han demostrado que esta región actúa menos como un archivero y más como un editor, revisando y consolidando continuamente los recuerdos tanto durante las horas de vigilia como durante el sueño. Cada acto de recordar, de hecho, parece volver un recuerdo temporalmente inestable, susceptible a una alteración sutil antes de ser archivado nuevamente, un fenómeno conocido como reconsolidación. Esto ayuda a explicar por qué contar una historia repetidamente puede distorsionar gradualmente sus detalles, incluso cuando quien la narra no tiene ninguna intención de engañar. La intensidad emocional complica aún más el panorama: las experiencias muy cargadas emocionalmente suelen recordarse con mayor viveza y seguridad, pero la viveza no garantiza exactitud, y los recuerdos traumáticos en particular pueden estar marcados por inconsistencias sorprendentes. Comprender la memoria como una facultad fundamentalmente reconstructiva, en lugar de un archivo estático, ha transformado campos que van desde la psicología clínica hasta la práctica legal, llevando a los tribunales de varios países a tratar el testimonio ocular no corroborado con considerablemente más cautela que antes. Las implicaciones se extienden más allá de la sala del tribunal, invitando a una reconsideración más amplia de cuánto deberíamos confiar en la vívida certeza de nuestros propios recuerdos.`,
+    glossary:{
+      "reconstructive":"reconstructivo", "retrieval":"recuperación",
+      "plausible":"plausible / creíble", "distributed":"distribuido",
+      "eyewitness":"testigo ocular", "recollection":"recuerdo",
+      "diverge":"diferir / desviarse", "hippocampus":"hipocampo",
+      "consolidating":"consolidando", "susceptible":"susceptible",
+      "reconsolidation":"reconsolidación", "distort":"distorsionar",
+      "vividness":"viveza / vivacidad", "accuracy":"exactitud",
+      "inconsistencies":"inconsistencias", "faculty":"facultad (capacidad mental)",
+      "uncorroborated":"no corroborado", "prompting":"provocando / llevando a",
+      "recollections":"recuerdos"
+    },
+    questions:[
+      {
+        q:"According to the passage, what happens to a memory each time it is recalled?",
+        options:["It is permanently locked and cannot change","It becomes temporarily unstable and can be subtly altered","It is deleted from the hippocampus","It automatically becomes more accurate"],
+        correct:1,
+        explanation:"El texto dice: 'each act of remembering... appears to render a memory temporarily unstable, susceptible to subtle alteration'."
+      },
+      {
+        q:"What effect can highly emotional experiences have on memory, according to the text?",
+        options:["They are always remembered perfectly","They are recalled with more vividness and confidence, but not necessarily more accuracy","They are usually forgotten quickly","They have no measurable effect on recall"],
+        correct:1,
+        explanation:"El texto indica: 'highly charged experiences are often recalled with greater vividness and confidence, yet vividness does not guarantee accuracy'."
+      }
+    ]
+  },
+
+  {
+    id:"c2", level:"C",
+    title:"The Lighthouse Keeper's Confession",
+    subtitle:"Un relato literario original sobre soledad, rescate y reconexión humana.",
+    text:`For eleven years I tended the light at Cape Verrow, and in that time I convinced myself that solitude had made me virtuous. I told the fishermen who occasionally moored below the cliffs that I preferred silence to company, that the rhythmic sweep of the beam across the water was conversation enough for a man like me. It was, I now admit, a comfortable lie. The truth is that I had arranged my entire existence around the avoidance of disappointment, and a lighthouse, perched at the ragged edge of the continent, seemed the surest place to accomplish that. Ships passed, storms gathered and dissolved, and I logged each one with meticulous, almost devotional care, as though the act of recording could substitute for the act of living. It was only after the wreck of the Amaranth, when I pulled a half-drowned boy from water so cold it seemed to burn, that the architecture of my solitude began to crack. The boy, barely conscious, gripped my sleeve with a desperation that no lighthouse log could ever capture, and something in me, long dormant, answered that grip without hesitation. I sat with him through the night, feeding the stove, murmuring assurances I was not certain I believed myself. By dawn, he was breathing easily, and I realized, with something between grief and relief, that I had missed the sound of another human voice more than I had ever permitted myself to acknowledge. I do not know if I am capable of unlearning eleven years of careful distance. But I have begun, tentatively, to leave the lamp room door unlatched, in case anyone else should ever need to climb the stairs.`,
+    translation:`Durante once años cuidé el faro de Cape Verrow, y en ese tiempo me convencí de que la soledad me había vuelto virtuoso. Les decía a los pescadores que a veces amarraban bajo los acantilados que prefería el silencio a la compañía, que el barrido rítmico del haz de luz sobre el agua era conversación suficiente para un hombre como yo. Era, ahora lo admito, una mentira cómoda. La verdad es que había organizado toda mi existencia en torno a evitar la decepción, y un faro, encaramado en el borde escarpado del continente, parecía el lugar más seguro para lograrlo. Los barcos pasaban, las tormentas se formaban y se disolvían, y yo registraba cada una con un cuidado meticuloso, casi devoto, como si el acto de anotar pudiera sustituir al acto de vivir. Fue solo después del naufragio del Amaranth, cuando saqué del agua a un muchacho medio ahogado, tan fría que parecía quemar, que la estructura de mi soledad comenzó a resquebrajarse. El muchacho, apenas consciente, se aferró a mi manga con una desesperación que ningún registro del faro podría jamás capturar, y algo en mí, dormido durante mucho tiempo, respondió a ese aferre sin vacilar. Me senté con él toda la noche, alimentando la estufa, murmurando palabras de aliento que ni yo mismo estaba seguro de creer. Al amanecer, él respiraba con tranquilidad, y me di cuenta, con algo entre el duelo y el alivio, de que había extrañado el sonido de otra voz humana más de lo que jamás me había permitido reconocer. No sé si soy capaz de desaprender once años de cuidadosa distancia. Pero he comenzado, tentativamente, a dejar sin seguro la puerta del cuarto de la lámpara, por si alguien más necesitara alguna vez subir las escaleras.`,
+    glossary:{
+      "tended":"cuidó / atendió", "solitude":"soledad", "virtuous":"virtuoso",
+      "moored":"amarraban (barcos)", "rhythmic":"rítmico", "beam":"haz de luz",
+      "ragged":"escarpado / irregular", "meticulous":"meticuloso",
+      "devotional":"devoto / con devoción", "wreck":"naufragio",
+      "drowned":"ahogado", "dormant":"dormido / inactivo",
+      "hesitation":"vacilación", "murmuring":"murmurando",
+      "assurances":"palabras de aliento / garantías", "grief":"duelo / pena",
+      "acknowledge":"reconocer", "tentatively":"tentativamente",
+      "unlatched":"sin seguro / sin pestillo"
+    },
+    questions:[
+      {
+        q:"What event begins to change the lighthouse keeper's view of solitude?",
+        options:["A storm destroys the lighthouse","He rescues a boy from a shipwreck","He receives a letter from his family","He retires from his job"],
+        correct:1,
+        explanation:"El texto dice: 'after the wreck of the Amaranth, when I pulled a half-drowned boy from water... the architecture of my solitude began to crack'."
+      },
+      {
+        q:"By the end of the passage, what does the keeper decide to do?",
+        options:["Move away from the lighthouse permanently","Leave the lamp room door unlatched in case someone needs help","Write a book about his experiences","Stop recording ships in his log"],
+        correct:1,
+        explanation:"El texto concluye: 'I have begun, tentatively, to leave the lamp room door unlatched, in case anyone else should ever need to climb the stairs'."
+      }
+    ]
+  }
+];
+
+// Índice rápido por id, usado por los popups de vocabulario
+const readingsById = {};
+readings.forEach(r => readingsById[r.id] = r);
+
+
+/* =========================================================================
+   2. RENDER — construir las tarjetas de lectura en el DOM
+   ========================================================================= */
+
+const levelLabels = { A:"Nivel A · Básico", B:"Nivel B · Intermedio", C:"Nivel C · Avanzado" };
+
+function tokenizeToFragment(text){
+  const frag = document.createDocumentFragment();
+  const tokens = text.match(/[A-Za-z']+|[^A-Za-z']+/g) || [];
+  tokens.forEach(tok => {
+    if (/^[A-Za-z]/.test(tok)) {
+      const span = document.createElement('span');
+      span.className = 'word';
+      span.textContent = tok;
+      span.dataset.key = tok.toLowerCase().replace(/'/g, '');
+      span.tabIndex = 0;
+      frag.appendChild(span);
+    } else {
+      frag.appendChild(document.createTextNode(tok));
+    }
+  });
+  return frag;
+}
+
+function estimateReadingTime(text){
+  const words = text.trim().split(/\s+/).length;
+  const minutes = Math.max(1, Math.round(words / 130));
+  return { words, minutes };
+}
+
+function buildCard(reading){
+  const { words, minutes } = estimateReadingTime(reading.text);
+
+  const card = document.createElement('article');
+  card.className = 'reading-card';
+  card.dataset.level = reading.level;
+  card.dataset.readingId = reading.id;
+  card.dataset.titleSearch = reading.title.toLowerCase();
+
+  // ---- head ----
+  const head = document.createElement('div');
+  head.className = 'card-head';
+  head.innerHTML = `
+    <span class="level-badge">${levelLabels[reading.level]}</span>
+    <span class="meta-info">${words} palabras<br>~${minutes} min de lectura</span>
+  `;
+  card.appendChild(head);
+
+  const title = document.createElement('h3');
+  title.className = 'card-title';
+  title.textContent = reading.title;
+  card.appendChild(title);
+
+  const subtitle = document.createElement('p');
+  subtitle.className = 'card-subtitle';
+  subtitle.textContent = reading.subtitle;
+  card.appendChild(subtitle);
+
+  // ---- reading text ----
+  const textEl = document.createElement('p');
+  textEl.className = 'reading-text';
+  textEl.appendChild(tokenizeToFragment(reading.text));
+  card.appendChild(textEl);
+
+  // ---- translation toggle ----
+  const toggleBtn = document.createElement('button');
+  toggleBtn.className = 'translation-toggle';
+  toggleBtn.setAttribute('aria-expanded', 'false');
+  toggleBtn.innerHTML = `<span class="tt-label">Ver traducción completa</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="6 9 12 15 18 9"/></svg>`;
+  card.appendChild(toggleBtn);
+
+  const translationBox = document.createElement('div');
+  translationBox.className = 'translation-box';
+  translationBox.textContent = reading.translation;
+  card.appendChild(translationBox);
+
+  toggleBtn.addEventListener('click', () => {
+    const isOpen = translationBox.classList.toggle('open');
+    toggleBtn.classList.toggle('open', isOpen);
+    toggleBtn.querySelector('.tt-label').textContent = isOpen ? 'Ocultar traducción' : 'Ver traducción completa';
+    toggleBtn.setAttribute('aria-expanded', String(isOpen));
+  });
+
+  // ---- comprehension questions ----
+  const qWrap = document.createElement('div');
+  qWrap.className = 'questions';
+  const qTitle = document.createElement('div');
+  qTitle.className = 'questions-title';
+  qTitle.textContent = 'Preguntas de comprensión';
+  qWrap.appendChild(qTitle);
+
+  reading.questions.forEach((q, qIndex) => {
+    const qEl = document.createElement('div');
+    qEl.className = 'question';
+
+    const qText = document.createElement('p');
+    qText.className = 'q-text';
+    qText.textContent = `${qIndex + 1}. ${q.q}`;
+    qEl.appendChild(qText);
+
+    const optWrap = document.createElement('div');
+    optWrap.className = 'options';
+
+    q.options.forEach((optText, optIndex) => {
+      const optBtn = document.createElement('button');
+      optBtn.className = 'option-btn';
+      optBtn.textContent = optText;
+      optBtn.dataset.optIndex = optIndex;
+      optBtn.addEventListener('click', () => {
+        if (qEl.classList.contains('answered')) return;
+        qEl.classList.add('answered');
+        const allBtns = optWrap.querySelectorAll('.option-btn');
+        allBtns.forEach(b => b.disabled = true);
+
+        const feedback = qEl.querySelector('.feedback');
+        if (optIndex === q.correct) {
+          optBtn.classList.add('correct');
+          feedback.textContent = '¡Correcto! ' + q.explanation;
+          feedback.classList.add('correct-text');
+        } else {
+          optBtn.classList.add('incorrect');
+          allBtns[q.correct].classList.add('correct');
+          feedback.textContent = 'Incorrecto. ' + q.explanation;
+          feedback.classList.add('incorrect-text');
+        }
+      });
+      optWrap.appendChild(optBtn);
+    });
+
+    qEl.appendChild(optWrap);
+
+    const feedback = document.createElement('p');
+    feedback.className = 'feedback';
+    qEl.appendChild(feedback);
+
+    qWrap.appendChild(qEl);
+  });
+
+  card.appendChild(qWrap);
+
+  return card;
+}
+
+function renderAllCards(){
+  const grid = document.getElementById('reading-grid');
+  grid.innerHTML = '';
+  readings.forEach(r => grid.appendChild(buildCard(r)));
+}
+
+
+/* =========================================================================
+   3. VOCABULARY POPUP — clic en cualquier palabra
+   ========================================================================= */
+
+const popup = document.getElementById('vocab-popup');
+const popupWordEl = popup.querySelector('.vocab-word');
+const popupMeaningEl = popup.querySelector('.vocab-meaning');
+
+function showPopup(wordEl){
+  const card = wordEl.closest('.reading-card');
+  const reading = readingsById[card.dataset.readingId];
+  const key = wordEl.dataset.key;
+  const meaning = (reading.glossary && reading.glossary[key]) || commonWords[key];
+
+  popupWordEl.textContent = wordEl.textContent;
+
+  if (meaning) {
+    popupMeaningEl.textContent = meaning;
+    popup.classList.remove('no-def');
+  } else {
+    popupMeaningEl.textContent = 'Esta palabra no está en el glosario todavía. Intenta buscarla en un diccionario.';
+    popup.classList.add('no-def');
+  }
+
+  popup.style.display = 'block';
+
+  const rect = wordEl.getBoundingClientRect();
+  const popupWidth = popup.offsetWidth;
+  let left = rect.left + window.scrollX;
+  const maxLeft = window.scrollX + document.documentElement.clientWidth - popupWidth - 12;
+  if (left > maxLeft) left = Math.max(8, maxLeft);
+  if (left < 8) left = 8;
+  let top = rect.bottom + window.scrollY + 8;
+
+  popup.style.left = left + 'px';
+  popup.style.top = top + 'px';
+
+  document.querySelectorAll('.word.active').forEach(w => w.classList.remove('active'));
+  wordEl.classList.add('active');
+}
+
+function hidePopup(){
+  popup.style.display = 'none';
+  document.querySelectorAll('.word.active').forEach(w => w.classList.remove('active'));
+}
+
+document.addEventListener('click', (e) => {
+  const wordEl = e.target.closest('.word');
+  if (wordEl) {
+    e.stopPropagation();
+    showPopup(wordEl);
+    return;
+  }
+  if (!e.target.closest('#vocab-popup')) {
+    hidePopup();
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') hidePopup();
+  if (e.key === 'Enter' && document.activeElement && document.activeElement.classList.contains('word')) {
+    showPopup(document.activeElement);
+  }
+});
+
+document.getElementById('vocab-close').addEventListener('click', (e) => {
+  e.stopPropagation();
+  hidePopup();
+});
+
+
+/* =========================================================================
+   4. FILTROS DE NIVEL + BÚSQUEDA EN TIEMPO REAL
+   ========================================================================= */
+
+let currentLevel = 'all';
+let currentSearch = '';
+
+function applyFilters(){
+  const cards = document.querySelectorAll('.reading-card');
+  let visibleCount = 0;
+
+  cards.forEach(card => {
+    const levelMatch = currentLevel === 'all' || card.dataset.level === currentLevel;
+    const searchMatch = !currentSearch || card.dataset.titleSearch.includes(currentSearch);
+    const visible = levelMatch && searchMatch;
+    card.style.display = visible ? '' : 'none';
+    if (visible) visibleCount++;
+  });
+
+  document.getElementById('empty-state').classList.toggle('show', visibleCount === 0);
+  document.getElementById('result-count').textContent =
+    visibleCount === readings.length ? `${visibleCount} lecturas` : `${visibleCount} de ${readings.length} lecturas`;
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentLevel = btn.dataset.level;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b === btn));
+    applyFilters();
+  });
+});
+
+document.getElementById('search-input').addEventListener('input', (e) => {
+  currentSearch = e.target.value.trim().toLowerCase();
+  applyFilters();
+});
+
+
+/* =========================================================================
+   5. BARRA SUPERIOR — cronómetro de sesión y estado de guardado
+   ========================================================================= */
+
+let elapsedSeconds = 0;
+function formatTime(totalSeconds){
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+setInterval(() => {
+  elapsedSeconds++;
+  document.getElementById('session-timer').textContent = formatTime(elapsedSeconds);
+}, 1000);
+
+function cycleAutosave(){
+  const dot = document.getElementById('autosave-dot');
+  const label = document.getElementById('autosave-label');
+  label.textContent = 'Guardando cambios…';
+  dot.classList.add('saving');
+  setTimeout(() => {
+    label.textContent = 'Todo guardado';
+    dot.classList.remove('saving');
+  }, 900);
+}
+setInterval(cycleAutosave, 18000);
+
+
+/* =========================================================================
+   6. INICIALIZACIÓN
+   ========================================================================= */
+
+renderAllCards();
+applyFilters();
+</script>
+</body>
+</html>
